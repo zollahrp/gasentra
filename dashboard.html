@@ -1,0 +1,1105 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GASENTRA - Telemetry & Decision Support Dashboard</title>
+    <meta name="description" content="Dashboard Cerdas Pemantau Kebocoran, Keaslian Isi, Konsumsi LPG per Tabung, HPP Menu Dapur & Penasihat Transisi Energi.">
+    <meta name="theme-color" content="#070e18">
+    <meta name="color-scheme" content="dark">
+
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <!-- Chart.js for High-Fidelity Telemetry Trends -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        display: ['"Orbitron"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        gas: {
+                            bg: '#070e18',
+                            surface: '#0c1726',
+                            card: '#111f35',
+                            border: '#1e3352',
+                            cyan: '#00f0ff',
+                            blue: '#0284c7',
+                            flame: '#2563eb',
+                            amber: '#f59e0b',
+                            red: '#ef4444',
+                            emerald: '#10b981',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #070e18;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(12, 23, 38, 0.78);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(30, 51, 82, 0.85);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.2);
+        }
+        .glow-red {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.2);
+        }
+        .tech-grid {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+        /* Pulse animations */
+        @keyframes pulse-fast {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.4; transform: scale(0.98); }
+        }
+        .animate-pulse-fast {
+            animation: pulse-fast 1s infinite ease-in-out;
+        }
+    </style>
+</head>
+<body class="tech-grid min-h-screen flex flex-col font-sans selection:bg-gas-cyan selection:text-black">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-gas-border px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <img src="logo-icon.svg" alt="GASENTRA" class="w-10 h-10 transition-transform group-hover:scale-105">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-display font-black text-xl tracking-wider text-white">GAS<span class="text-gas-cyan">ENTRA</span></span>
+                            <span class="px-2 py-0.5 text-[10px] font-display font-semibold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded">LIVE TELEMETRY</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Dapur Utama Restoran · Gateway ID: GW-SUB-0418</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Header Controls & Nav Links -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <a href="index.html" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-house"></i>
+                    <span class="hidden sm:inline">Portal</span>
+                </a>
+                <a href="hardware.html" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-microchip text-gas-cyan"></i>
+                    <span class="hidden sm:inline">Mockup Hardware</span>
+                </a>
+                <a href="digital-twin-3d.html" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-cubes text-purple-400"></i>
+                    <span class="hidden sm:inline">3D Twin</span>
+                </a>
+
+                <!-- Emergency Solenoid Valve Quick Indicator -->
+                <div class="h-5 w-px bg-gas-border"></div>
+                <div id="topValveStatusPill" class="px-3 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                    <span class="w-2 h-2 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span id="topValveStatusText">KATUP: OPEN</span>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Sub-Navbar: Active Outlet Info & Interactive Simulation Drawer -->
+    <div class="bg-gas-surface/90 border-b border-gas-border px-4 py-2.5">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
+            <!-- Outlet Breadcrumb -->
+            <div class="flex items-center gap-2 text-slate-300">
+                <i class="fa-solid fa-kitchen-set text-gas-cyan"></i>
+                <span class="font-bold text-white">Central Kitchen Wonokromo, Surabaya</span>
+                <span class="text-slate-500">·</span>
+                <span class="text-slate-400">4 Manifold Cylinders Active (3x 12kg, 1x 50kg)</span>
+                <span class="text-slate-500">·</span>
+                <span class="text-emerald-400 font-mono">LoRa RSSI: -64 dBm</span>
+            </div>
+
+            <!-- Quick Simulator Action Buttons -->
+            <div class="flex items-center gap-2">
+                <span class="text-[11px] text-slate-400 font-mono">SIMULASI:</span>
+                <button onclick="simulateLeakTabung2()" id="btnSimLeak" class="px-2.5 py-1 rounded-md bg-red-950/60 hover:bg-red-900/60 text-red-300 border border-red-700 font-semibold transition flex items-center gap-1">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span>Bocor Tabung 2</span>
+                </button>
+                <button onclick="simulateFraudSwap()" class="px-2.5 py-1 rounded-md bg-amber-950/60 hover:bg-amber-900/60 text-amber-300 border border-amber-700 font-semibold transition flex items-center gap-1">
+                    <i class="fa-solid fa-scale-unbalanced"></i>
+                    <span>Cek Tabung Oplosan</span>
+                </button>
+                <button onclick="resetAllSimulation()" class="px-2 py-1 rounded-md bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium transition" title="Pulihkan Normal">
+                    <i class="fa-solid fa-rotate-left"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6 flex-1 w-full space-y-8">
+
+        <!-- ========================================================================= -->
+        <!-- ROW 1: 4 TOP EXECUTIVE METRICS CARDS                                      -->
+        <!-- ========================================================================= -->
+        <section class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            
+            <!-- Metric 1: Total LPG Gas Remaining -->
+            <div class="glass-panel rounded-2xl p-4 border-gas-border relative overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-400 font-mono">TOTAL LPG MANIFOLD</span>
+                    <span class="w-8 h-8 rounded-lg bg-gas-blue/20 text-gas-cyan flex items-center justify-center text-sm border border-gas-blue/40">
+                        <i class="fa-solid fa-fire-burner"></i>
+                    </span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span id="metricTotalWeight" class="text-2xl font-display font-black text-white">69.4 kg</span>
+                    <span class="text-xs font-semibold text-slate-400">/ 86.0 kg</span>
+                    <span class="text-xs font-bold text-gas-emerald font-mono ml-auto">80.7%</span>
+                </div>
+                <!-- Progress bar -->
+                <div class="w-full bg-slate-800 h-2 rounded-full mt-3 overflow-hidden">
+                    <div id="barTotalWeight" class="bg-gradient-to-r from-cyan-500 to-emerald-500 h-full rounded-full transition-all duration-500" style="width: 80.7%;"></div>
+                </div>
+                <div class="mt-2 flex justify-between text-[11px] text-slate-400 font-mono">
+                    <span>Laju: 1.18 kg/jam</span>
+                    <span>Est: <strong class="text-white">4 hari 6 jam</strong> lagi</span>
+                </div>
+            </div>
+
+            <!-- Metric 2: Safety & Correlation Leak Status -->
+            <div id="cardSafetyStatus" class="glass-panel rounded-2xl p-4 border-gas-border relative overflow-hidden transition-all duration-300">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-400 font-mono">STATUS KESELAMATAN</span>
+                    <span id="badgeSafetyIcon" class="w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/40">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </span>
+                </div>
+                <div class="mt-2">
+                    <span id="textSafetyStatus" class="text-2xl font-display font-black text-emerald-400">AMAN (0 BOCOR)</span>
+                    <p id="subtextSafetyStatus" class="text-xs text-slate-300 mt-1">
+                        Solenoid Manifold: <span class="text-emerald-400 font-mono font-bold">Terbuka Normal</span>
+                    </p>
+                </div>
+                <div class="mt-3 pt-2 border-t border-gas-border flex justify-between text-[11px] text-slate-400 font-mono">
+                    <span>Gas Maks: <span id="valMaxGasPpm" class="text-emerald-400">28 ppm</span></span>
+                    <span class="text-emerald-400 font-bold">Offline Edge Ready</span>
+                </div>
+            </div>
+
+            <!-- Metric 3: Gas Cost per Portion (HPP POS) -->
+            <div class="glass-panel rounded-2xl p-4 border-gas-border relative overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-400 font-mono">HPP GAS PER PORSI</span>
+                    <span class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center text-sm border border-amber-500/40">
+                        <i class="fa-solid fa-utensils"></i>
+                    </span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span class="text-2xl font-display font-black text-white">Rp 840</span>
+                    <span class="text-xs text-slate-400">/ porsi</span>
+                    <span class="text-xs font-bold text-emerald-400 font-mono ml-auto">Hemat 14%</span>
+                </div>
+                <div class="mt-3 pt-2 border-t border-gas-border flex justify-between text-[11px] text-slate-400 font-mono">
+                    <span>214 Menu Dimasak Hari Ini</span>
+                    <span class="text-slate-300">Total Gas: 18.2 kg</span>
+                </div>
+            </div>
+
+            <!-- Metric 4: Cek Isi Tabung & Kerugian Dicegah -->
+            <div class="glass-panel rounded-2xl p-4 border-gas-border relative overflow-hidden">
+                <div class="flex items-center justify-between">
+                    <span class="text-xs font-semibold text-slate-400 font-mono">CEK ISI TABUNG (FRAUD)</span>
+                    <span class="w-8 h-8 rounded-lg bg-purple-500/20 text-purple-300 flex items-center justify-center text-sm border border-purple-500/40">
+                        <i class="fa-solid fa-magnifying-glass-dollar"></i>
+                    </span>
+                </div>
+                <div class="mt-2 flex items-baseline gap-2">
+                    <span id="metricSavedMoney" class="text-2xl font-display font-black text-purple-300">Rp 184.000</span>
+                    <span class="text-xs text-slate-400">dicegah</span>
+                </div>
+                <div class="mt-3 pt-2 border-t border-gas-border flex justify-between text-[11px] text-slate-400 font-mono">
+                    <span>12 Tabung Ditimbang</span>
+                    <span id="metricFraudCount" class="text-amber-400 font-bold">1 Terindikasi Kurang</span>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ROW 2: LIVE MULTI-CYLINDER MANIFOLD MATRIX (INDIVIDUAL IoT CARDS)         -->
+        <!-- ========================================================================= -->
+        <section class="space-y-3">
+            <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                    <span class="w-2.5 h-2.5 rounded-full bg-gas-cyan animate-pulse"></span>
+                    <h2 class="font-display font-bold text-base text-white">MATRIKS TELEMETRI PER TABUNG (SMART PAD IoT)</h2>
+                </div>
+                <span class="text-xs text-slate-400 font-mono">Pembaruan frekuensi: 1 detik (LoRa Sub-GHz)</span>
+            </div>
+
+            <!-- 4 Cylinder Cards Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                
+                <!-- CYLINDER 1: 12 kg (NORMAL) -->
+                <div class="glass-panel rounded-2xl p-4 border-gas-border space-y-3 relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-pink-500/20 text-pink-400 font-display font-bold text-xs flex items-center justify-center border border-pink-500/40">
+                                T1
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-white text-sm">Tabung 1 (12 kg)</h3>
+                                <span class="text-[10px] text-slate-400 font-mono">SN: BG12-2026-9041</span>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            AMAN
+                        </span>
+                    </div>
+
+                    <!-- Weight Gauge -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">Sisa Netto Gas:</span>
+                            <span class="font-mono font-bold text-white">8.60 kg <span class="text-emerald-400">(72%)</span></span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-emerald-500 h-full rounded-full" style="width: 72%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Telemetry Matrix -->
+                    <div class="p-2.5 rounded-xl bg-gas-bg/80 border border-gas-border text-[11px] font-mono space-y-1">
+                        <div class="flex justify-between text-slate-300">
+                            <span>Laju Konsumsi:</span>
+                            <span class="text-gas-cyan">0.18 kg/jam</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Sensor Gas MQ-6:</span>
+                            <span class="text-emerald-400">18 ppm (Aman)</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Est. Habis:</span>
+                            <span class="text-white">47 Jam lagi</span>
+                        </div>
+                    </div>
+
+                    <div class="text-[10px] text-slate-400 flex justify-between pt-1 border-t border-gas-border">
+                        <span>Alas: Smart Pad #01</span>
+                        <span>Baterai: 94%</span>
+                    </div>
+                </div>
+
+                <!-- CYLINDER 2: 12 kg (LEAK SIMULATION TARGET) -->
+                <div id="cardTabung2" class="glass-panel rounded-2xl p-4 border-gas-border space-y-3 relative overflow-hidden transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-pink-500/20 text-pink-400 font-display font-bold text-xs flex items-center justify-center border border-pink-500/40">
+                                T2
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-white text-sm">Tabung 2 (12 kg)</h3>
+                                <span class="text-[10px] text-slate-400 font-mono">SN: BG12-2026-8812</span>
+                            </div>
+                        </div>
+                        <span id="badgeTabung2" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            AMAN
+                        </span>
+                    </div>
+
+                    <!-- Weight Gauge -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">Sisa Netto Gas:</span>
+                            <span id="valT2Weight" class="font-mono font-bold text-white">4.10 kg <span class="text-amber-400">(34%)</span></span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div id="barT2Weight" class="bg-amber-500 h-full rounded-full transition-all duration-300" style="width: 34%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Telemetry Matrix -->
+                    <div class="p-2.5 rounded-xl bg-gas-bg/80 border border-gas-border text-[11px] font-mono space-y-1">
+                        <div class="flex justify-between text-slate-300">
+                            <span>Laju Konsumsi:</span>
+                            <span id="valT2Rate" class="text-gas-cyan">0.12 kg/jam</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Sensor Gas MQ-6:</span>
+                            <span id="valT2Ppm" class="text-emerald-400">22 ppm (Aman)</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Est. Habis:</span>
+                            <span id="valT2Time" class="text-white">34 Jam lagi</span>
+                        </div>
+                    </div>
+
+                    <div class="text-[10px] text-slate-400 flex justify-between pt-1 border-t border-gas-border">
+                        <span>Alas: Smart Pad #02</span>
+                        <span id="valT2Action" class="text-gas-cyan font-bold cursor-pointer hover:underline" onclick="simulateLeakTabung2()">Klik Uji Bocor</span>
+                    </div>
+                </div>
+
+                <!-- CYLINDER 3: 12 kg (BARU DITIMBANG / FRAUD SIMULATION) -->
+                <div id="cardTabung3" class="glass-panel rounded-2xl p-4 border-amber-500/40 space-y-3 relative overflow-hidden bg-amber-950/10">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-pink-500/20 text-pink-400 font-display font-bold text-xs flex items-center justify-center border border-pink-500/40">
+                                T3
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-white text-sm">Tabung 3 (12 kg)</h3>
+                                <span class="text-[10px] text-slate-400 font-mono">SN: BG12-2026-7731</span>
+                            </div>
+                        </div>
+                        <span id="badgeTabung3" class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                            ISI KURANG 0.8 kg
+                        </span>
+                    </div>
+
+                    <!-- Weight Gauge -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">Netto Awal Masuk:</span>
+                            <span class="font-mono font-bold text-amber-400">11.20 kg <span class="text-slate-400">(Std: 12.0)</span></span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-amber-500 h-full rounded-full" style="width: 93.3%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Telemetry Matrix -->
+                    <div class="p-2.5 rounded-xl bg-gas-bg/80 border border-gas-border text-[11px] font-mono space-y-1">
+                        <div class="flex justify-between text-slate-300">
+                            <span>Status Cek Isi:</span>
+                            <span class="text-amber-400 font-bold">Tekor 0.80 kg</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Supplier / Agen:</span>
+                            <span class="text-white">Agen Sukolilo Jaya</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Rating Agen:</span>
+                            <span class="text-amber-400">⭐ 2.9 (Tekor 3x)</span>
+                        </div>
+                    </div>
+
+                    <div class="text-[10px] text-slate-400 flex justify-between pt-1 border-t border-gas-border">
+                        <button onclick="claimFraudTabung3()" class="text-amber-400 font-bold hover:underline">
+                            <i class="fa-brands fa-whatsapp"></i> Klaim Penggantian Agen
+                        </button>
+                        <span>Baru Dipasang</span>
+                    </div>
+                </div>
+
+                <!-- CYLINDER 4: 50 kg (INDUSTRIAL HEAVY-DUTY) -->
+                <div class="glass-panel rounded-2xl p-4 border-gas-border space-y-3 relative overflow-hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-2">
+                            <span class="w-7 h-7 rounded-lg bg-blue-500/20 text-blue-400 font-display font-bold text-xs flex items-center justify-center border border-blue-500/40">
+                                T4
+                            </span>
+                            <div>
+                                <h3 class="font-bold text-white text-sm">Tabung 4 (50 kg)</h3>
+                                <span class="text-[10px] text-slate-400 font-mono">SN: CM50-2026-1120</span>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                            AMAN
+                        </span>
+                    </div>
+
+                    <!-- Weight Gauge -->
+                    <div class="space-y-1">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-400">Sisa Netto Gas:</span>
+                            <span class="font-mono font-bold text-white">45.50 kg <span class="text-emerald-400">(91%)</span></span>
+                        </div>
+                        <div class="w-full bg-slate-800 h-2 rounded-full overflow-hidden">
+                            <div class="bg-blue-500 h-full rounded-full" style="width: 91%;"></div>
+                        </div>
+                    </div>
+
+                    <!-- Mini Telemetry Matrix -->
+                    <div class="p-2.5 rounded-xl bg-gas-bg/80 border border-gas-border text-[11px] font-mono space-y-1">
+                        <div class="flex justify-between text-slate-300">
+                            <span>Laju Konsumsi:</span>
+                            <span class="text-gas-cyan">0.88 kg/jam (Wok Main)</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Sensor Gas MQ-6:</span>
+                            <span class="text-emerald-400">14 ppm (Aman)</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Est. Habis:</span>
+                            <span class="text-white">51 Jam lagi</span>
+                        </div>
+                    </div>
+
+                    <div class="text-[10px] text-slate-400 flex justify-between pt-1 border-t border-gas-border">
+                        <span>Alas: Heavy Pad #04</span>
+                        <span>Baterai: 98%</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ROW 3: CORRELATION ENGINE (KILLER FEATURE) & REAL-TIME CHART              -->
+        <!-- ========================================================================= -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Correlation Algorithm Explanation & Live Triage (5 cols) -->
+            <div class="lg:col-span-5 glass-panel rounded-2xl p-5 border-gas-border flex flex-col justify-between space-y-4">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between pb-2 border-b border-gas-border">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-gas-flame/20 text-gas-cyan flex items-center justify-center text-sm border border-gas-flame/40">
+                                <i class="fa-solid fa-code-fork"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-bold text-sm text-white">MESIN KORELASI MULTI-SENSOR</h3>
+                                <span class="text-[10px] text-slate-400 font-mono">Inovasi Inti: Isolasi Tabung Tanpa Salah Alarm</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Detektor konvensional di dinding hanya tahu bahwa <em>ada bau gas di ruangan</em>, namun tidak tahu <strong>tabung mana yang bocor</strong>. GASENTRA mengkorelasikan 3 sinyal simultan pada tingkat tabung:
+                    </p>
+
+                    <!-- Formula Mathematical Box -->
+                    <div class="p-3 rounded-xl bg-black/60 border border-gas-border font-mono text-[11px] space-y-1.5 text-slate-300">
+                        <div class="text-gas-cyan font-bold">Indeks Korelasi Kebocoran Tabung (i):</div>
+                        <div class="p-2 rounded bg-slate-900 border border-slate-800 text-center font-bold text-white text-xs">
+                            K(i) = [w₁ · (ΔW/Δt)] + [w₂ · PPM_local(i)] + [w₃ · (1 - OrderActive_POS)]
+                        </div>
+                        <div class="text-[10px] text-slate-400 space-y-0.5">
+                            <div>• <strong>ΔW/Δt:</strong> Laju penurunan berat abnormal (&gt; 35 g/menit tanpa kompor aktif).</div>
+                            <div>• <strong>PPM_local:</strong> Kadar butana/propana pada bibir ring bawah tabung (i).</div>
+                            <div>• <strong>POS Sync:</strong> Mencegah false alarm saat koki sedang memasak pesanan ramai.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Triage Decision Status Box -->
+                <div id="triageBox" class="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/40 space-y-2 transition-all duration-300">
+                    <div class="flex items-center justify-between">
+                        <span class="text-xs font-bold text-emerald-400 flex items-center gap-1.5">
+                            <i class="fa-solid fa-circle-check"></i> KEPUTUSAN GATEWAY EDGE (OFFLINE):
+                        </span>
+                        <span class="text-[10px] font-mono text-slate-400">Latency: 0.18s</span>
+                    </div>
+                    <p id="triageDescription" class="text-xs text-slate-300">
+                        Seluruh tabung berada dalam toleransi konsumsi normal. Katup solenoid utama terbuka mengalirkan gas ke seluruh tungku.
+                    </p>
+                    <div class="flex items-center gap-2 pt-2 border-t border-slate-800 text-[11px]">
+                        <span class="text-slate-400">Tindakan Otomatis:</span>
+                        <span id="triageAction" class="font-bold text-emerald-300 font-mono">STANDBY / PEMANTAUAN RUTIN</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Telemetry Graph (7 cols) -->
+            <div class="lg:col-span-7 glass-panel rounded-2xl p-5 border-gas-border space-y-3 flex flex-col">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-gas-border">
+                    <div class="flex items-center gap-2">
+                        <span class="w-2.5 h-2.5 rounded-full bg-gas-emerald animate-pulse"></span>
+                        <h3 class="font-display font-bold text-sm text-white">DINAMIKA TELEMETRI KORELASI (PPM vs LAJU BERAT)</h3>
+                    </div>
+                    <div class="flex items-center gap-2 text-[10px] font-mono text-slate-400">
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-cyan-400"></span> Sensor PPM Gas</span>
+                        <span class="flex items-center gap-1"><span class="w-2 h-2 rounded-full bg-amber-400"></span> Laju Penurunan Berat</span>
+                    </div>
+                </div>
+
+                <!-- Canvas Chart -->
+                <div class="w-full flex-1 min-h-[260px] relative">
+                    <canvas id="telemetryChart"></canvas>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ROW 4: POS INTEGRATION & GHOST BURNER FLAME DETECTOR                      -->
+        <!-- ========================================================================= -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            
+            <!-- Left: POS Integration & Gas Cost per Portion (7 cols) -->
+            <div class="lg:col-span-7 glass-panel rounded-2xl p-5 border-gas-border space-y-4">
+                <div class="flex items-center justify-between pb-3 border-b border-gas-border">
+                    <div>
+                        <h3 class="font-display font-bold text-sm text-white flex items-center gap-2">
+                            <i class="fa-solid fa-cash-register text-gas-cyan"></i> INTEGRASI POS (POINT-OF-SALE) &amp; BIAYA GAS PER MENU
+                        </h3>
+                        <p class="text-xs text-slate-400">Sinkronisasi tiket dapur Moka / ESB POS untuk menghitung HPP energi nyata.</p>
+                    </div>
+                    <span class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-gas-blue/20 text-gas-cyan border border-gas-blue/40">
+                        POS SYNCED
+                    </span>
+                </div>
+
+                <!-- Menu HPP Table -->
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs text-slate-300">
+                        <thead class="bg-gas-bg/80 text-[10px] font-mono text-gas-cyan uppercase border-b border-gas-border">
+                            <tr>
+                                <th class="py-2.5 px-3">Menu Kuliner</th>
+                                <th class="py-2.5 px-3">Durasi Kompor</th>
+                                <th class="py-2.5 px-3">Konsumsi Gas</th>
+                                <th class="py-2.5 px-3">HPP Gas / Porsi</th>
+                                <th class="py-2.5 px-3 text-right">Pesanan Hari Ini</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-gas-border">
+                            <tr>
+                                <td class="py-2.5 px-3 font-semibold text-white">Nasi Goreng Seafood Wok</td>
+                                <td class="py-2.5 px-3 font-mono">3.2 menit</td>
+                                <td class="py-2.5 px-3 font-mono text-gas-cyan">0.021 kg</td>
+                                <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">Rp 420</td>
+                                <td class="py-2.5 px-3 font-mono text-right font-bold text-white">68 porsi</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 px-3 font-semibold text-white">Bebek Goreng Crispy (Deep Fryer)</td>
+                                <td class="py-2.5 px-3 font-mono">7.5 menit</td>
+                                <td class="py-2.5 px-3 font-mono text-gas-cyan">0.058 kg</td>
+                                <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">Rp 1.160</td>
+                                <td class="py-2.5 px-3 font-mono text-right font-bold text-white">52 porsi</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 px-3 font-semibold text-white">Rawon Daging Dapur (Slow Simmer)</td>
+                                <td class="py-2.5 px-3 font-mono">42 menit (batch)</td>
+                                <td class="py-2.5 px-3 font-mono text-gas-cyan">0.165 kg</td>
+                                <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">Rp 3.300 / pot</td>
+                                <td class="py-2.5 px-3 font-mono text-right font-bold text-white">14 batch</td>
+                            </tr>
+                            <tr>
+                                <td class="py-2.5 px-3 font-semibold text-white">Ayam Bakar Taliwang</td>
+                                <td class="py-2.5 px-3 font-mono">11 menit</td>
+                                <td class="py-2.5 px-3 font-mono text-gas-cyan">0.052 kg</td>
+                                <td class="py-2.5 px-3 font-mono font-bold text-emerald-400">Rp 1.040</td>
+                                <td class="py-2.5 px-3 font-mono text-right font-bold text-white">41 porsi</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Right: Ghost Burner Flame Alert & Predictive Swap (5 cols) -->
+            <div class="lg:col-span-5 space-y-4">
+                
+                <!-- Ghost Burner Alert Card -->
+                <div class="glass-panel rounded-2xl p-5 border-gas-border space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-gas-border">
+                        <div class="flex items-center gap-2">
+                            <div class="w-8 h-8 rounded-lg bg-amber-500/20 text-amber-300 flex items-center justify-center text-sm border border-amber-500/40">
+                                <i class="fa-solid fa-ghost"></i>
+                            </div>
+                            <div>
+                                <h3 class="font-display font-bold text-sm text-white">GHOST BURNER DETECTOR</h3>
+                                <span class="text-[10px] text-slate-400">Deteksi Kompor Menyala Tanpa Pesanan</span>
+                            </div>
+                        </div>
+                        <span class="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40">
+                            AKTIF
+                        </span>
+                    </div>
+
+                    <p class="text-xs text-slate-300">
+                        Banyak dapur menyalakan kompor gas saat tidak ada pesanan (idle flame) hingga puluhan menit, membuang gas sia-sia.
+                    </p>
+
+                    <div class="p-3 rounded-xl bg-amber-950/20 border border-amber-500/30 text-xs space-y-1.5">
+                        <div class="flex justify-between items-center text-amber-300 font-bold">
+                            <span><i class="fa-solid fa-triangle-exclamation"></i> Peringatan Terakhir:</span>
+                            <span class="text-[10px] font-mono text-slate-400">Kemarin, 15:42 WIB</span>
+                        </div>
+                        <p class="text-slate-300 text-[11px]">
+                            Kompor Wok Station 2 terdeteksi menyala selama <strong>24 menit tanpa tiket pesanan kasir</strong>. Konsumsi terbuang: 0.38 kg LPG (~Rp 7.600).
+                        </p>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-slate-400 font-mono pt-1">
+                        <span>Potensi Hemat per Bulan:</span>
+                        <span class="text-emerald-400 font-bold">Rp 380.000 / outlet</span>
+                    </div>
+                </div>
+
+                <!-- Predictive Swap & Auto-Reorder Card -->
+                <div class="glass-panel rounded-2xl p-5 border-gas-border space-y-3">
+                    <div class="flex items-center justify-between pb-2 border-b border-gas-border">
+                        <h4 class="font-display font-bold text-sm text-white flex items-center gap-2">
+                            <i class="fa-solid fa-truck-fast text-gas-cyan"></i> TUKAR TEPAT WAKTU &amp; REORDER
+                        </h4>
+                        <span class="text-[10px] font-mono text-emerald-400 font-bold">SMART DISPATCH</span>
+                    </div>
+                    <p class="text-xs text-slate-300">
+                        Memprediksi waktu habis tabung sebelum jam sibuk (*lunch/dinner rush*) dan memesan otomatis ke agen terpercaya agar tidak ada tabung ditukar dalam kondisi masih tersisa gas.
+                    </p>
+                    <div class="flex items-center gap-2">
+                        <button onclick="sendSampleWhatsAppOrder()" class="flex-1 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center gap-1.5">
+                            <i class="fa-brands fa-whatsapp"></i> Test Pesan Ulang Agen
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- ROW 5: PENASIHAT TRANSISI ENERGI & LAPORAN ESG (HORIZON ZERO-CARBON)      -->
+        <!-- ========================================================================= -->
+        <section class="glass-panel rounded-2xl p-6 border-gas-border space-y-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-gas-border">
+                <div class="space-y-1">
+                    <div class="inline-flex items-center gap-2 px-2.5 py-0.5 rounded-md bg-emerald-500/10 border border-emerald-500/30 text-emerald-400 text-xs font-mono font-bold">
+                        <i class="fa-solid fa-leaf"></i> HORIZON PILAR ZERO-CARBON &amp; ESG COMPLIANCE
+                    </div>
+                    <h2 class="text-xl font-display font-bold text-white">
+                        Penasihat Transisi Energi Cerdas <span class="text-gas-cyan">&amp; Laporan Emisi Karbon</span>
+                    </h2>
+                    <p class="text-xs text-slate-300 max-w-2xl">
+                        GASENTRA tidak hanya menjaga keselamatan saat ini, tetapi juga menghitung kelayakan finansial dan waktu balik modal (*Payback Period*) untuk beralih dari LPG fosil menuju energi bersih (Kompor Induksi, Biogas, atau PLTS Dapur).
+                    </p>
+                </div>
+
+                <div class="flex items-center gap-2">
+                    <button onclick="exportEsgReport()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gas-blue hover:bg-blue-600 text-white transition flex items-center gap-1.5 shadow-md">
+                        <i class="fa-solid fa-file-pdf"></i> Unduh Laporan ESG Bulanan
+                    </button>
+                </div>
+            </div>
+
+            <!-- Interactive Transition Calculator & ESG Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- Calculator Controls (5 cols) -->
+                <div class="lg:col-span-5 p-4 rounded-xl bg-gas-bg/80 border border-gas-border space-y-4">
+                    <h3 class="font-display font-bold text-sm text-white flex items-center gap-2">
+                        <i class="fa-solid fa-calculator text-gas-cyan"></i> SIMULATOR BALIK MODAL (BEP)
+                    </h3>
+
+                    <!-- Spending Input Slider -->
+                    <div class="space-y-1.5">
+                        <div class="flex justify-between text-xs">
+                            <span class="text-slate-300">Biaya Pembelian LPG Bulanan:</span>
+                            <span id="labelMonthlyGas" class="font-mono font-bold text-gas-cyan text-sm">Rp 4.500.000 / bln</span>
+                        </div>
+                        <input type="range" id="sliderMonthlyGas" min="1500000" max="25000000" step="500000" value="4500000" oninput="updateTransitionAdvisor(this.value)" class="w-full accent-cyan-400 cursor-pointer">
+                        <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                            <span>Rp 1.5 Jt (UMKM)</span>
+                            <span>Rp 25 Jt (Hotel/Resto Besar)</span>
+                        </div>
+                    </div>
+
+                    <!-- Clean Energy Technology Switcher -->
+                    <div class="space-y-1.5">
+                        <label class="text-xs font-semibold text-slate-300">Pilih Opsi Energi Bersih:</label>
+                        <div class="grid grid-cols-3 gap-2">
+                            <button onclick="setTransitionTech('induction')" id="techBtnInduction" class="p-2 rounded-lg text-xs font-semibold border border-gas-cyan bg-gas-blue/20 text-white text-center transition ring-1 ring-gas-cyan">
+                                <i class="fa-solid fa-bolt text-gas-cyan block mb-1"></i>
+                                <span>Induksi 5kW</span>
+                            </button>
+                            <button onclick="setTransitionTech('biogas')" id="techBtnBiogas" class="p-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition">
+                                <i class="fa-solid fa-recycle text-emerald-400 block mb-1"></i>
+                                <span>Biogas Dapur</span>
+                            </button>
+                            <button onclick="setTransitionTech('plts')" id="techBtnPlts" class="p-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition">
+                                <i class="fa-solid fa-solar-panel text-amber-400 block mb-1"></i>
+                                <span>PLTS Atap</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Scope 1 Carbon Tracker Box -->
+                    <div class="p-3 rounded-xl bg-black/60 border border-slate-800 space-y-1 font-mono text-xs">
+                        <div class="text-[10px] text-slate-400 font-bold border-b border-slate-800 pb-1">
+                            EMISI GAS RUMAH KACA SAAT INI (SCOPE 1)
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Konsumsi LPG:</span>
+                            <span id="esgLpgKg" class="text-white">225 kg / bulan</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Faktor Emisi:</span>
+                            <span class="text-slate-400">2.983 kg CO₂e / kg LPG</span>
+                        </div>
+                        <div class="flex justify-between text-slate-300">
+                            <span>Jejak Karbon:</span>
+                            <span id="esgCarbonKg" class="text-red-400 font-bold">671.1 kg CO₂e / bulan</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Feasibility & Recommendation Display (7 cols) -->
+                <div class="lg:col-span-7 flex flex-col justify-between space-y-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                        <div class="p-3.5 rounded-xl bg-gas-bg/80 border border-gas-border">
+                            <span class="text-[10px] text-slate-400 font-mono block">INVESTASI AWAL (CAPEX)</span>
+                            <span id="resCapex" class="font-display font-black text-lg text-white">Rp 12.000.000</span>
+                            <span id="resCapexNote" class="text-[10px] text-slate-400 block mt-0.5">2 Unit Kompor Induksi Komersial</span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-gas-bg/80 border border-gas-border">
+                            <span class="text-[10px] text-slate-400 font-mono block">PENGHEMATAN OPEX</span>
+                            <span id="resOpex" class="font-display font-black text-lg text-emerald-400">Rp 1.125.000 / bln</span>
+                            <span class="text-[10px] text-slate-400 block mt-0.5">Efisiensi termal 85% vs 40%</span>
+                        </div>
+                        <div class="p-3.5 rounded-xl bg-gas-bg/80 border border-gas-border col-span-2 sm:col-span-1">
+                            <span class="text-[10px] text-slate-400 font-mono block">BALIK MODAL (BEP)</span>
+                            <span id="resBep" class="font-display font-black text-lg text-gas-cyan">10.7 Bulan</span>
+                            <span class="text-[10px] text-emerald-300 font-bold block mt-0.5">Sangat Direkomendasikan</span>
+                        </div>
+                    </div>
+
+                    <!-- Recommendation Callout -->
+                    <div id="advisorSummaryCard" class="p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/40 space-y-2">
+                        <div class="flex items-center gap-2">
+                            <i class="fa-solid fa-chart-line text-emerald-400 text-sm"></i>
+                            <h4 class="font-display font-bold text-sm text-white">Rekomendasi Penasihat Energi GASENTRA:</h4>
+                        </div>
+                        <p id="advisorSummaryText" class="text-xs text-slate-300 leading-relaxed">
+                            Berdasarkan volume konsumsi gas Anda sebesar 225 kg/bulan, beralih ke <strong>Kompor Induksi Komersial</strong> akan menghemat biaya operasional sebesar <strong>25% per bulan</strong> dan memangkas 4.2 ton CO₂e emisi karbon per tahun. Modal investasi dapat kembali penuh dalam tempo <strong>10.7 bulan</strong>.
+                        </p>
+                    </div>
+
+                    <div class="flex items-center justify-between text-xs text-slate-400 font-mono pt-2 border-t border-gas-border">
+                        <span>Status ESG Rating Perusahaan:</span>
+                        <span class="text-emerald-400 font-bold">GRADE A · Siap Laporan Keberlanjutan</span>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-gas-border py-6 px-4 text-center text-xs text-slate-400 space-y-2">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <img src="logo-icon.svg" alt="GASENTRA" class="w-6 h-6">
+                <span class="font-display font-bold text-white">GASENTRA</span>
+                <span>· Telemetry &amp; Decision Support Dashboard</span>
+            </div>
+            <div class="text-[11px] text-slate-400">
+                SRE Universitas Airlangga · Catalyst Summit 2026 Business Plan Competition
+            </div>
+        </div>
+    </footer>
+
+    <!-- Interactive Dashboard Script & Chart.js -->
+    <script>
+        // Global Dashboard State
+        let isLeaking = false;
+        let chartInstance = null;
+        let chartDataPoints = {
+            times: ['08:00', '08:02', '08:04', '08:06', '08:08', '08:10', '08:12', '08:14'],
+            ppmGas: [18, 20, 24, 22, 25, 28, 24, 22],
+            weightLoss: [0.15, 0.18, 0.19, 0.17, 0.20, 0.18, 0.19, 0.18]
+        };
+
+        let currentTechOption = 'induction';
+        let currentMonthlyExpense = 4500000;
+
+        function initChart() {
+            const ctx = document.getElementById('telemetryChart').getContext('2d');
+            chartInstance = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: chartDataPoints.times,
+                    datasets: [
+                        {
+                            label: 'Konsentrasi Gas PPM (MQ-6 Tabung 2)',
+                            data: chartDataPoints.ppmGas,
+                            borderColor: '#00f0ff',
+                            backgroundColor: 'rgba(0, 240, 255, 0.1)',
+                            borderWidth: 2,
+                            fill: true,
+                            tension: 0.3,
+                            yAxisID: 'y'
+                        },
+                        {
+                            label: 'Laju Penurunan Berat (kg/jam)',
+                            data: chartDataPoints.weightLoss,
+                            borderColor: '#f59e0b',
+                            backgroundColor: 'transparent',
+                            borderWidth: 2,
+                            borderDash: [4, 4],
+                            tension: 0.3,
+                            yAxisID: 'y1'
+                        }
+                    ]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    interaction: {
+                        mode: 'index',
+                        intersect: false,
+                    },
+                    scales: {
+                        x: {
+                            grid: { color: 'rgba(30, 51, 82, 0.4)' },
+                            ticks: { color: '#94a3b8', font: { family: 'JetBrains Mono', size: 10 } }
+                        },
+                        y: {
+                            type: 'linear',
+                            display: true,
+                            position: 'left',
+                            title: { display: true, text: 'Gas PPM', color: '#00f0ff', font: { size: 10 } },
+                            grid: { color: 'rgba(30, 51, 82, 0.4)' },
+                            ticks: { color: '#00f0ff', font: { family: 'JetBrains Mono', size: 10 } }
+                        },
+                        y1: {
+                            type: 'linear',
+                            display: true,
+                            position: 'right',
+                            title: { display: true, text: 'Laju Berat (kg/h)', color: '#f59e0b', font: { size: 10 } },
+                            grid: { drawOnChartArea: false },
+                            ticks: { color: '#f59e0b', font: { family: 'JetBrains Mono', size: 10 } }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // SIMULATION: LEAK ON TABUNG 2
+        function simulateLeakTabung2() {
+            isLeaking = true;
+            
+            // 1. Update Safety Status Card
+            const cardSafety = document.getElementById('cardSafetyStatus');
+            const iconSafety = document.getElementById('badgeSafetyIcon');
+            const textSafety = document.getElementById('textSafetyStatus');
+            const subSafety = document.getElementById('subtextSafetyStatus');
+            const maxPpm = document.getElementById('valMaxGasPpm');
+
+            cardSafety.className = 'glass-panel rounded-2xl p-4 border-red-500 space-y-1 relative overflow-hidden bg-red-950/20 glow-red';
+            iconSafety.className = 'w-8 h-8 rounded-lg bg-red-500/20 text-red-400 flex items-center justify-center text-sm border border-red-500/40 animate-pulse';
+            iconSafety.innerHTML = '<i class="fa-solid fa-triangle-exclamation"></i>';
+            textSafety.className = 'text-2xl font-display font-black text-red-400 animate-pulse';
+            textSafety.innerText = 'BAHAYA KEBOCORAN!';
+            subSafety.innerHTML = 'Tabung 2 Bocor (850 ppm) · Katup Otomatis <strong class="text-red-400">DITUTUP (08:12 WIB)</strong>';
+            maxPpm.innerText = '850 ppm (Bahaya)';
+            maxPpm.className = 'text-red-400 font-bold';
+
+            // 2. Update Top Bar Pill
+            const topPill = document.getElementById('topValveStatusPill');
+            const topText = document.getElementById('topValveStatusText');
+            topPill.className = 'px-3 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 bg-red-500/20 text-red-300 border border-red-500/50 animate-pulse';
+            topText.innerText = 'KATUP: SHUT OFF (BOCOR)';
+
+            // 3. Update Cylinder 2 Card
+            const cardT2 = document.getElementById('cardTabung2');
+            const badgeT2 = document.getElementById('badgeTabung2');
+            const valRate = document.getElementById('valT2Rate');
+            const valPpm = document.getElementById('valT2Ppm');
+            const valAction = document.getElementById('valT2Action');
+
+            cardT2.className = 'glass-panel rounded-2xl p-4 border-red-500 space-y-3 relative overflow-hidden bg-red-950/30 glow-red animate-pulse-fast';
+            badgeT2.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-red-500 text-white animate-pulse';
+            badgeT2.innerText = 'BOCOR TERISOLASI';
+            valRate.innerText = '-0.85 kg/jam (Anomali)';
+            valRate.className = 'text-red-400 font-bold';
+            valPpm.innerText = '850 ppm (BAHAYA!)';
+            valPpm.className = 'text-red-400 font-bold';
+            valAction.innerText = 'Katup Otomatis Memutus Aliran';
+            valAction.className = 'text-red-300 font-bold';
+
+            // 4. Update Triage Box
+            const tBox = document.getElementById('triageBox');
+            const tDesc = document.getElementById('triageDescription');
+            const tAct = document.getElementById('triageAction');
+            tBox.className = 'p-4 rounded-xl bg-red-950/40 border border-red-500/70 space-y-2 glow-red';
+            tDesc.innerHTML = 'Korelasi Positif: Lonjakan gas 850 ppm dan penurunan massa tajam (&Delta;W/&Delta;t: -45g/menit) pada <strong>Tabung 2</strong> tanpa adanya tiket order POS memasak. Tabung 2 berhasil diisolasi!';
+            tAct.className = 'font-bold text-red-400 font-mono animate-pulse';
+            tAct.innerText = 'KATUP OTOMATIS DITUTUP · SIRENE AKTIF · NOTIFIKASI WA TERKIRIM';
+
+            // 5. Update Chart Spike
+            chartInstance.data.labels = ['08:00', '08:04', '08:08', '08:10', '08:11', '08:12 (Leak)', '08:13 (Valve Cut)', '08:14'];
+            chartInstance.data.datasets[0].data = [18, 22, 25, 45, 180, 850, 420, 110];
+            chartInstance.data.datasets[1].data = [0.15, 0.17, 0.19, 0.22, 0.65, 1.45, 0.00, 0.00];
+            chartInstance.update();
+        }
+
+        function resetAllSimulation() {
+            isLeaking = false;
+
+            // Reset Safety Card
+            const cardSafety = document.getElementById('cardSafetyStatus');
+            const iconSafety = document.getElementById('badgeSafetyIcon');
+            const textSafety = document.getElementById('textSafetyStatus');
+            const subSafety = document.getElementById('subtextSafetyStatus');
+            const maxPpm = document.getElementById('valMaxGasPpm');
+
+            cardSafety.className = 'glass-panel rounded-2xl p-4 border-gas-border relative overflow-hidden';
+            iconSafety.className = 'w-8 h-8 rounded-lg bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-sm border border-emerald-500/40';
+            iconSafety.innerHTML = '<i class="fa-solid fa-shield-halved"></i>';
+            textSafety.className = 'text-2xl font-display font-black text-emerald-400';
+            textSafety.innerText = 'AMAN (0 BOCOR)';
+            subSafety.innerHTML = 'Solenoid Manifold: <span class="text-emerald-400 font-mono font-bold">Terbuka Normal</span>';
+            maxPpm.innerText = '28 ppm';
+            maxPpm.className = 'text-emerald-400';
+
+            // Reset Top Bar
+            const topPill = document.getElementById('topValveStatusPill');
+            const topText = document.getElementById('topValveStatusText');
+            topPill.className = 'px-3 py-1 rounded-full text-xs font-mono font-bold flex items-center gap-1.5 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+            topText.innerText = 'KATUP: OPEN';
+
+            // Reset Tabung 2
+            const cardT2 = document.getElementById('cardTabung2');
+            const badgeT2 = document.getElementById('badgeTabung2');
+            const valRate = document.getElementById('valT2Rate');
+            const valPpm = document.getElementById('valT2Ppm');
+            const valAction = document.getElementById('valT2Action');
+
+            cardT2.className = 'glass-panel rounded-2xl p-4 border-gas-border space-y-3 relative overflow-hidden';
+            badgeT2.className = 'px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+            badgeT2.innerText = 'AMAN';
+            valRate.innerText = '0.12 kg/jam';
+            valRate.className = 'text-gas-cyan';
+            valPpm.innerText = '22 ppm (Aman)';
+            valPpm.className = 'text-emerald-400';
+            valAction.innerText = 'Klik Uji Bocor';
+            valAction.className = 'text-gas-cyan font-bold cursor-pointer hover:underline';
+
+            // Reset Triage Box
+            const tBox = document.getElementById('triageBox');
+            const tDesc = document.getElementById('triageDescription');
+            const tAct = document.getElementById('triageAction');
+            tBox.className = 'p-4 rounded-xl bg-emerald-950/20 border border-emerald-500/40 space-y-2';
+            tDesc.innerText = 'Seluruh tabung berada dalam toleransi konsumsi normal. Katup solenoid utama terbuka mengalirkan gas ke seluruh tungku.';
+            tAct.className = 'font-bold text-emerald-300 font-mono';
+            tAct.innerText = 'STANDBY / PEMANTAUAN RUTIN';
+
+            // Reset Chart
+            chartInstance.data.labels = chartDataPoints.times;
+            chartInstance.data.datasets[0].data = [18, 20, 24, 22, 25, 28, 24, 22];
+            chartInstance.data.datasets[1].data = [0.15, 0.18, 0.19, 0.17, 0.20, 0.18, 0.19, 0.18];
+            chartInstance.update();
+        }
+
+        function simulateFraudSwap() {
+            alert('🔍 SIMULASI CEK ISI TABUNG:\n\nTabung baru (SN: BG12-2026-7731) ditimbang otomatis saat dipasang di Smart Pad 3.\n\nBerat Standar Gross: 27.10 kg (Netto 12.0 kg)\nBerat Aktual Terukur: 26.30 kg (Netto 11.2 kg)\nSelisih: Kurang 0.80 kg gas!\n\nStatus: Terverifikasi Pengurangan Isi / Indikasi Oplosan.\nRating Agen diturunkan menjadi 2.9★.');
+        }
+
+        function claimFraudTabung3() {
+            alert('📱 KLAIM RESMI WHATSAPP TERKIRIM KE AGEN LPG:\n\n"Halo Agen Sukolilo Jaya, tabung 12kg dengan serial BG12-2026-7731 terdeteksi kurang 0.8kg oleh sistem timbangan presisi GASENTRA Restoran Wonokromo. Mohon penukaran atau kredit potongan nota sebesar Rp 18.400 sesuai SLA kontrak."');
+        }
+
+        function sendSampleWhatsAppOrder() {
+            alert('📱 AUTO-REORDER DISPATCH:\n\nPesan otomatis terkirim via WhatsApp API ke Agen Resmi:\n\n"Pemesanan Otomatis GASENTRA:\nOutlet: Central Kitchen Wonokromo\nKebutuhan: 2 Tabung Bright Gas 12 kg\nPrediksi Habis Tabung Aktif: Hari ini pukul 17:30 WIB (sebelum dinner rush).\nMohon pengiriman pukul 16:00 WIB."');
+        }
+
+        function exportEsgReport() {
+            alert('🌱 LAPORAN ESG & EMISI KARBON BERHASIL DIUNDUH!\n\nLaporan Bulanan Periode Mei 2026:\n- Konsumsi LPG: 482 kg\n- Emisi Scope 1: 1.438 Ton CO₂e\n- Rekomendasi Transisi: Kompor Induksi 5kW\n- Status Kepatuhan: Selaras Pilar HORIZON Zero-Carbon & Standar GRI.');
+        }
+
+        // --- ENERGY TRANSITION ADVISOR CALCULATOR ---
+        function setTransitionTech(tech) {
+            currentTechOption = tech;
+            const bInd = document.getElementById('techBtnInduction');
+            const bBio = document.getElementById('techBtnBiogas');
+            const bPlt = document.getElementById('techBtnPlts');
+
+            bInd.className = 'p-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition';
+            bBio.className = 'p-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition';
+            bPlt.className = 'p-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition';
+
+            if (tech === 'induction') {
+                bInd.className = 'p-2 rounded-lg text-xs font-semibold border border-gas-cyan bg-gas-blue/20 text-white text-center transition ring-1 ring-gas-cyan';
+            } else if (tech === 'biogas') {
+                bBio.className = 'p-2 rounded-lg text-xs font-semibold border border-emerald-500 bg-emerald-500/20 text-white text-center transition ring-1 ring-emerald-500';
+            } else {
+                bPlt.className = 'p-2 rounded-lg text-xs font-semibold border border-amber-500 bg-amber-500/20 text-white text-center transition ring-1 ring-amber-500';
+            }
+            updateTransitionAdvisor(currentMonthlyExpense);
+        }
+
+        function updateTransitionAdvisor(val) {
+            currentMonthlyExpense = parseInt(val);
+            document.getElementById('labelMonthlyGas').innerText = `Rp ${currentMonthlyExpense.toLocaleString('id-ID')} / bln`;
+
+            // LPG kg per month (assuming Rp 20.000 / kg commercial)
+            const lpgKg = Math.round(currentMonthlyExpense / 20000);
+            document.getElementById('esgLpgKg').innerText = `${lpgKg} kg / bulan`;
+
+            // Carbon emissions: 2.983 kg CO2e per kg LPG
+            const carbonKg = (lpgKg * 2.983).toFixed(1);
+            document.getElementById('esgCarbonKg').innerText = `${carbonKg} kg CO₂e / bln`;
+
+            let capex = 12000000;
+            let capexNote = '2 Unit Kompor Induksi Komersial 5kW';
+            let opexSavingsPct = 0.25; // 25% savings due to 85% thermal efficiency
+            let techName = 'Kompor Induksi Komersial';
+
+            if (currentTechOption === 'biogas') {
+                capex = 18500000;
+                capexNote = 'Anaerobic Digester Limbah Sisa Dapur';
+                opexSavingsPct = 0.40; // 40% gas substitution
+                techName = 'Reaktor Biogas Limbah Dapur';
+            } else if (currentTechOption === 'plts') {
+                capex = 35000000;
+                capexNote = 'Sistem PLTS Atap Dapur 5 kWp + Inverter';
+                opexSavingsPct = 0.55; // 55% energy savings overall
+                techName = 'Pembangkit Listrik Tenaga Surya (PLTS Atap)';
+            }
+
+            const monthlySavings = Math.round(currentMonthlyExpense * opexSavingsPct);
+            const bepMonths = (capex / monthlySavings).toFixed(1);
+
+            document.getElementById('resCapex').innerText = `Rp ${capex.toLocaleString('id-ID')}`;
+            document.getElementById('resCapexNote').innerText = capexNote;
+            document.getElementById('resOpex').innerText = `Rp ${monthlySavings.toLocaleString('id-ID')} / bln`;
+            document.getElementById('resBep').innerText = `${bepMonths} Bulan`;
+
+            document.getElementById('advisorSummaryText').innerHTML = `
+                Berdasarkan konsumsi gas Anda sebesar <strong>${lpgKg} kg/bulan (Rp ${currentMonthlyExpense.toLocaleString('id-ID')})</strong>, beralih ke <strong>${techName}</strong> akan memangkas biaya energi sebesar <strong>${Math.round(opexSavingsPct * 100)}% per bulan</strong> dan mereduksi hingga <strong>${((carbonKg * 12 * opexSavingsPct) / 1000).toFixed(1)} ton CO₂e</strong> emisi karbon per tahun. Seluruh modal awal dapat kembali penuh (BEP) dalam waktu <strong>${bepMonths} bulan</strong>.
+            `;
+        }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initChart();
+            updateTransitionAdvisor(4500000);
+        });
+    </script>
+</body>
+</html>

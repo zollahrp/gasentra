@@ -1,0 +1,523 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GASENTRA - Solusi Cerdas Pemantau Kebocoran, Keaslian Isi &amp; Konsumsi LPG</title>
+    <meta name="description" content="GASENTRA: Sistem Cerdas Pemantau Kebocoran, Keaslian Isi, dan Konsumsi LPG Langsung di Tingkat Tabung. Catalyst Summit 2026 Business Plan Competition.">
+    <meta name="theme-color" content="#070e18">
+    <meta name="color-scheme" content="dark">
+
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        display: ['"Orbitron"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        gas: {
+                            bg: '#070e18',
+                            surface: '#0c1726',
+                            card: '#111f35',
+                            border: '#1e3352',
+                            cyan: '#00f0ff',
+                            blue: '#0284c7',
+                            flame: '#2563eb',
+                            amber: '#f59e0b',
+                            red: '#ef4444',
+                            emerald: '#10b981',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #070e18;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(12, 23, 38, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(30, 51, 82, 0.85);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.25);
+        }
+        .glow-blue {
+            box-shadow: 0 0 30px rgba(37, 99, 235, 0.3);
+        }
+        .tech-grid {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+    </style>
+</head>
+<body class="tech-grid min-h-screen flex flex-col font-sans selection:bg-gas-cyan selection:text-black">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-gas-border px-4 lg:px-8 py-3.5">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <img src="logo-icon.svg" alt="GASENTRA" class="w-10 h-10 transition-transform group-hover:scale-105">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-display font-black text-xl tracking-wider text-white">GAS<span class="text-gas-cyan">ENTRA</span></span>
+                            <span class="px-2 py-0.5 text-[10px] font-display font-semibold bg-gas-blue/20 text-gas-cyan border border-gas-blue/40 rounded">CATALYST 2026</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">SRE Universitas Airlangga · Business Plan Competition</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Direct Quick-Links to the 3 Core Outputs -->
+            <nav class="hidden md:flex items-center gap-2">
+                <a href="hardware.html" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-2 border border-transparent hover:border-gas-border">
+                    <i class="fa-solid fa-microchip text-gas-cyan"></i>
+                    <span>1. Mockup Hardware</span>
+                </a>
+                <a href="dashboard.html" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-2 border border-transparent hover:border-gas-border">
+                    <i class="fa-solid fa-chart-line text-gas-emerald"></i>
+                    <span>2. Dashboard Web</span>
+                </a>
+                <a href="digital-twin-3d.html" class="px-3.5 py-1.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/80 transition flex items-center gap-2 border border-transparent hover:border-gas-border">
+                    <i class="fa-solid fa-cubes text-purple-400"></i>
+                    <span>3. 3D Digital Twin</span>
+                </a>
+            </nav>
+
+            <!-- CTA Presentation Button -->
+            <div class="flex items-center gap-2">
+                <a href="#outputsSection" class="px-4 py-2 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-400 hover:to-blue-500 text-black font-display font-bold text-xs uppercase tracking-wider transition shadow-lg shadow-cyan-500/25 flex items-center gap-2">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span>Jelajahi 3 Output</span>
+                </a>
+            </div>
+        </div>
+    </header>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-8 flex-1 w-full space-y-16">
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 1: HERO & EXECUTIVE VALUE PROPOSITION                             -->
+        <!-- ========================================================================= -->
+        <section class="relative pt-6 pb-4">
+            <div class="absolute -top-10 left-1/2 -translate-x-1/2 w-[600px] h-[300px] bg-gradient-to-b from-gas-cyan/15 to-transparent blur-3xl pointer-events-none"></div>
+
+            <div class="relative z-10 max-w-4xl mx-auto text-center space-y-6">
+                <!-- Catalyst Summit Badge -->
+                <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-gas-card border border-gas-border text-xs font-mono text-gas-cyan">
+                    <span class="w-2 h-2 rounded-full bg-gas-cyan animate-pulse"></span>
+                    <span>CATALYST SUMMIT 2026 · BUSINESS PLAN COMPETITION · SRE UNAIR</span>
+                </div>
+
+                <!-- Main Slogan & Title -->
+                <h1 class="text-3xl sm:text-5xl lg:text-6xl font-display font-black text-white tracking-tight leading-tight">
+                    Sistem Cerdas Pemantau Kebocoran, Keaslian Isi &amp; Konsumsi LPG, <span class="text-transparent bg-clip-text bg-gradient-to-r from-gas-cyan to-blue-500">Langsung di Tingkat Tabung</span>
+                </h1>
+
+                <!-- Core Tagline from Poster -->
+                <p class="text-base sm:text-xl font-medium text-slate-300 max-w-2xl mx-auto">
+                    <span class="text-gas-cyan font-bold">Aman.</span> <span class="text-emerald-400 font-bold">Utuh.</span> <span class="text-amber-400 font-bold">Terpakai.</span> Siap beralih ke energi bersih.
+                </p>
+
+                <!-- 3 Problem Stat Boxes from Poster & Executive Summary -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 pt-4 text-left">
+                    <div class="glass-panel p-5 rounded-2xl border-gas-border relative overflow-hidden">
+                        <div class="text-red-400 font-display font-black text-3xl">94,7%</div>
+                        <div class="text-xs font-bold text-white mt-1">Luka Bakar Akibat Ledakan LPG</div>
+                        <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+                            Disebabkan kebocoran tabung. Detektor konvensional hanya mendeteksi bau di ruangan, <strong>tidak tahu tabung mana sumbernya</strong>.
+                        </p>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-2xl border-gas-border relative overflow-hidden">
+                        <div class="text-amber-400 font-display font-black text-3xl">Rp 19,25 M</div>
+                        <div class="text-xs font-bold text-white mt-1">Potensi Kerugian Isi Kurang</div>
+                        <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+                            Temuan Kemendag di 11 SPBE &amp; maraknya sindikat oplosan 3kg ke 12/50kg. Pelaku usaha tak punya alat pembuktian isi.
+                        </p>
+                    </div>
+
+                    <div class="glass-panel p-5 rounded-2xl border-gas-border relative overflow-hidden">
+                        <div class="text-gas-cyan font-display font-black text-3xl">Tak Terukur</div>
+                        <div class="text-xs font-bold text-white mt-1">Pemborosan Tak Disadari</div>
+                        <p class="text-[11px] text-slate-400 mt-2 leading-relaxed">
+                            Tabung ditukar sebelum habis tuntas, kompor menyala tanpa pesanan (idle flame), dan biaya gas per porsi menu tak pernah dihitung.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 2: THE 3 CORE OUTPUTS (USER'S EXACT SPECIFICATION)               -->
+        <!-- ========================================================================= -->
+        <section id="outputsSection" class="space-y-6 pt-4">
+            <div class="flex flex-col sm:flex-row sm:items-end justify-between gap-4 border-b border-gas-border pb-4">
+                <div>
+                    <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-gas-blue/20 text-gas-cyan text-[11px] font-mono font-bold mb-2">
+                        <i class="fa-solid fa-cubes-stacked"></i> 3 OUTPUT UTAMA SESUAI PERMINTAAN
+                    </div>
+                    <h2 class="text-2xl sm:text-3xl font-display font-black text-white">
+                        Tiga Output Prototipe Interaktif GASENTRA
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                        Dapat dibuka dan dioperasikan secara terpisah untuk presentasi, pengujian teknis, maupun demonstrasi juri.
+                    </p>
+                </div>
+            </div>
+
+            <!-- 3 Output Cards Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                
+                <!-- OUTPUT 1: MOCKUP 2 HARDWARE -->
+                <div class="glass-panel rounded-3xl p-6 border-gas-border flex flex-col justify-between space-y-6 relative overflow-hidden hover:border-gas-cyan/60 transition group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="w-12 h-12 rounded-2xl bg-cyan-500/20 text-gas-cyan flex items-center justify-center text-xl border border-cyan-500/40">
+                                <i class="fa-solid fa-microchip"></i>
+                            </span>
+                            <span class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-cyan-950/60 text-gas-cyan border border-cyan-500/30">
+                                OUTPUT 1 · PERANGKAT KERAS
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-display font-black text-white group-hover:text-gas-cyan transition">
+                                1. Mockup 2 Hardware (Terpisah)
+                            </h3>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                                Studio interaktif terpisah untuk menginspeksi dan menguji 2 perangkat fisik:
+                            </p>
+                            <ul class="text-xs text-slate-400 space-y-2 mt-3 font-mono">
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                                    <span><strong>Alas Pintar (Smart Pad):</strong> Sensor Gas MQ-6 + Timbangan 4-Load Cell terintegrasi per tabung.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-cyan-400 mt-0.5"></i>
+                                    <span><strong>Central Industrial Gateway:</strong> Pengolah data korelasi edge, sirene 105 dB, OLED, dan kontrol katup otomatis.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-[11px] text-slate-400 space-y-1">
+                            <div class="text-white font-semibold">Fitur Interaktif Halaman:</div>
+                            <div>• 3D WebGL Model Viewer 360° untuk kedua alat</div>
+                            <div>• Mode Bongkar Lapisan (Exploded Anatomy View)</div>
+                            <div>• Simulator slider berat &amp; PPM gas dengan ADC raw</div>
+                            <div>• Tombol Emergency Slam Switch dengan audio alarm</div>
+                        </div>
+                    </div>
+
+                    <a href="hardware.html" class="w-full py-3 rounded-xl bg-gas-blue hover:bg-blue-600 text-white font-display font-bold text-xs uppercase tracking-wider transition text-center flex items-center justify-center gap-2 shadow-lg shadow-gas-blue/25">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>Buka Mockup Hardware (hardware.html)</span>
+                    </a>
+                </div>
+
+                <!-- OUTPUT 2: WEB DASHBOARD -->
+                <div class="glass-panel rounded-3xl p-6 border-gas-border flex flex-col justify-between space-y-6 relative overflow-hidden hover:border-emerald-500/60 transition group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="w-12 h-12 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-xl border border-emerald-500/40">
+                                <i class="fa-solid fa-chart-line"></i>
+                            </span>
+                            <span class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-emerald-950/60 text-emerald-300 border border-emerald-500/30">
+                                OUTPUT 2 · DASHBOARD
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-display font-black text-white group-hover:text-emerald-400 transition">
+                                2. Dashboard Web Telemetri
+                            </h3>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                                Pusat telemetri dan sistem pendukung keputusan cerdas dapur komersial:
+                            </p>
+                            <ul class="text-xs text-slate-400 space-y-2 mt-3 font-mono">
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                                    <span><strong>Matriks Multi-Tabung:</strong> Monitoring real-time berat, laju konsumsi, dan prediksi waktu habis.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                                    <span><strong>Mesin Korelasi Bocor:</strong> Isolasi tabung bermasalah tanpa false alarm koki memasak.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-emerald-400 mt-0.5"></i>
+                                    <span><strong>Cek Isi &amp; POS Sync:</strong> Anti-oplosan SPBE &amp; hitung HPP gas per menu masakan.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-[11px] text-slate-400 space-y-1">
+                            <div class="text-white font-semibold">Fitur Interaktif Halaman:</div>
+                            <div>• Grafik dinamika waktu nyata (Chart.js)</div>
+                            <div>• Penasihat Transisi Energi (Kalkulator BEP Induksi/PLTS)</div>
+                            <div>• Tombol simulasi kebocoran &amp; pemutusan katup</div>
+                            <div>• Uji kirim notifikasi WhatsApp klaim agen</div>
+                        </div>
+                    </div>
+
+                    <a href="dashboard.html" class="w-full py-3 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-display font-bold text-xs uppercase tracking-wider transition text-center flex items-center justify-center gap-2 shadow-lg shadow-emerald-600/25">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>Buka Dashboard Penuh (dashboard.html)</span>
+                    </a>
+                </div>
+
+                <!-- OUTPUT 3: 3D DIGITAL TWIN -->
+                <div class="glass-panel rounded-3xl p-6 border-gas-border flex flex-col justify-between space-y-6 relative overflow-hidden hover:border-purple-500/60 transition group">
+                    <div class="space-y-4">
+                        <div class="flex items-center justify-between">
+                            <span class="w-12 h-12 rounded-2xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-xl border border-purple-500/40">
+                                <i class="fa-solid fa-cubes"></i>
+                            </span>
+                            <span class="px-2.5 py-1 rounded-md text-[10px] font-mono font-bold bg-purple-950/60 text-purple-300 border border-purple-500/30">
+                                OUTPUT 3 · 3D TWIN (OPSIONAL)
+                            </span>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-display font-black text-white group-hover:text-purple-400 transition">
+                                3. 3D Digital Twin Manifold
+                            </h3>
+                            <p class="text-xs text-slate-300 mt-2 leading-relaxed">
+                                Simulasi 3D Three.js WebGL realistis lingkungan gas manifold &amp; dapur:
+                            </p>
+                            <ul class="text-xs text-slate-400 space-y-2 mt-3 font-mono">
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-purple-400 mt-0.5"></i>
+                                    <span><strong>Ruang Manifold Pipa:</strong> Pipa gas kuning, katup solenoid merah, regulator, dan tabung.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-purple-400 mt-0.5"></i>
+                                    <span><strong>Simulasi Partikel Gas:</strong> Emisi partikel kabut gas volumetrik saat Tabung 2 bocor.</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa-solid fa-circle-check text-purple-400 mt-0.5"></i>
+                                    <span><strong>Api Wok Dinamis:</strong> Api kompor biru otomatis padam seketika saat katup memutus gas.</span>
+                                </li>
+                            </ul>
+                        </div>
+
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-[11px] text-slate-400 space-y-1">
+                            <div class="text-white font-semibold">Fitur Interaktif Halaman:</div>
+                            <div>• 5 Sudut Pandang Kamera Presets (Fly-To Smooth)</div>
+                            <div>• Bongkar Struktur Alas Tabung (Exploded View)</div>
+                            <div>• Mode Pencahayaan: Siang, Malam, &amp; Hazard Strobe</div>
+                            <div>• Audio sirene darurat Web Audio API</div>
+                        </div>
+                    </div>
+
+                    <a href="digital-twin-3d.html" class="w-full py-3 rounded-xl bg-purple-600 hover:bg-purple-500 text-white font-display font-bold text-xs uppercase tracking-wider transition text-center flex items-center justify-center gap-2 shadow-lg shadow-purple-600/25">
+                        <i class="fa-solid fa-arrow-up-right-from-square"></i>
+                        <span>Buka 3D Digital Twin (digital-twin-3d.html)</span>
+                    </a>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 3: SYSTEM ARCHITECTURE & 5 CORE INNOVATIONS                       -->
+        <!-- ========================================================================= -->
+        <section class="space-y-6">
+            <div class="border-b border-gas-border pb-4">
+                <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded bg-gas-blue/20 text-gas-cyan text-[11px] font-mono font-bold mb-2">
+                    <i class="fa-solid fa-shield-halved"></i> SATU SISTEM, TIGA LAPIS PERLINDUNGAN
+                </div>
+                <h2 class="text-2xl sm:text-3xl font-display font-black text-white">
+                    Lima Fitur Unggulan GASENTRA
+                </h2>
+                <p class="text-xs sm:text-sm text-slate-400 mt-1">
+                    Bukan sekadar detektor bocor biasa: solusi menyeluruh dari keamanan hingga efisiensi finansial dan transisi energi.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- Feature 1 -->
+                <div class="glass-panel p-6 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-500/20 text-red-400 flex items-center justify-center text-lg border border-red-500/40">
+                        <i class="fa-solid fa-crosshairs"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-base text-white">Deteksi per Tabung &amp; Katup Otomatis</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Menunjuk langsung tabung yang bocor melalui korelasi laju berat dan sensor sniffer gas lokal. Katup solenoid memutus aliran gas dalam &lt;2.8 detik secara mandiri tanpa butuh internet.
+                    </p>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-panel p-6 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 text-amber-400 flex items-center justify-center text-lg border border-amber-500/40">
+                        <i class="fa-solid fa-scale-unbalanced-flip"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-base text-white">Cek Isi Tabung (Anti-Oplosan)</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Setiap tabung baru ditimbang otomatis saat dipasang dan dibandingkan dengan berat standar kuota resmi. Isi yang kurang langsung ditandai dan dicatat sebagai rating kredibilitas agen SPBE.
+                    </p>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-panel p-6 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-gas-cyan/20 text-gas-cyan flex items-center justify-center text-lg border border-gas-cyan/40">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-base text-white">Tukar Tepat Waktu &amp; Auto-Reorder</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Memprediksi kapan tabung akan habis sebelum jam sibuk (*rush hour*) dapur. Mengirim order otomatis ke agen sehingga tidak ada gas terbuang akibat penukaran tabung yang belum habis total.
+                    </p>
+                </div>
+
+                <!-- Feature 4 -->
+                <div class="glass-panel p-6 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center text-lg border border-emerald-500/40">
+                        <i class="fa-solid fa-calculator"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-base text-white">Biaya Gas per Porsi &amp; Deteksi Ghost Flame</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Terintegrasi dengan kasir POS: menghitung HPP biaya gas per menu secara akurat dan memberikan peringatan keras jika kompor dibiarkan menyala tanpa ada pesanan aktif.
+                    </p>
+                </div>
+
+                <!-- Feature 5 -->
+                <div class="glass-panel p-6 rounded-2xl border-gas-border space-y-3 md:col-span-2 lg:col-span-2">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 text-purple-400 flex items-center justify-center text-lg border border-purple-500/40">
+                        <i class="fa-solid fa-leaf"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-base text-white">Laporan Emisi Karbon &amp; Penasihat Transisi Energi</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Merekap jejak karbon bulanan (Scope 1 GHG) untuk pelaporan ESG perusahaan. Dilengkapi kalkulator kelayakan finansial yang menghitung waktu balik modal (BEP) jika dapur beralih ke kompor induksi, reaktor biogas limbah dapur, atau PLTS atap.
+                    </p>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- SECTION 4: HORIZON THEMATIC ALIGNMENT & PACKAGES                          -->
+        <!-- ========================================================================= -->
+        <section class="grid grid-cols-1 lg:grid-cols-12 gap-8">
+            
+            <!-- Left: HORIZON Pillar Alignment (7 cols) -->
+            <div class="lg:col-span-7 glass-panel rounded-3xl p-6 border-gas-border space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-gas-border">
+                    <i class="fa-solid fa-compass text-gas-cyan"></i>
+                    <h3 class="font-display font-bold text-base text-white">KESELARASAN DENGAN TEMA HORIZON</h3>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                    <div class="p-3.5 rounded-xl bg-gas-bg/80 border border-gas-border space-y-1">
+                        <span class="font-display font-black text-sm text-gas-cyan">R · RESILIENT</span>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Mencegah kebakaran dan gangguan operasional dapur melalui isolasi kebocoran cepat &lt;2.8 detik.
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-gas-bg/80 border border-gas-border space-y-1">
+                        <span class="font-display font-black text-sm text-gas-emerald">I · INCLUSIVE</span>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Paket Lite terjangkau bagi jutaan UMKM kuliner pengguna LPG 3 kg dan perlindungan dari gas oplosan.
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-gas-bg/80 border border-gas-border space-y-1">
+                        <span class="font-display font-black text-sm text-purple-400">Z · ZERO-CARBON</span>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Laporan karbon bulanan dan Penasihat Transisi Energi untuk konversi ke kompor induksi &amp; energi terbarukan.
+                        </p>
+                    </div>
+
+                    <div class="p-3.5 rounded-xl bg-gas-bg/80 border border-gas-border space-y-1">
+                        <span class="font-display font-black text-sm text-gas-amber">N · NETWORKS</span>
+                        <p class="text-slate-300 text-[11px] leading-relaxed">
+                            Platform ekosistem yang menghubungkan dapur, agen LPG resmi, sistem kasir POS, dan perusahaan asuransi.
+                        </p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right: Product Packages (5 cols) -->
+            <div class="lg:col-span-5 glass-panel rounded-3xl p-6 border-gas-border space-y-4">
+                <div class="flex items-center gap-2 pb-2 border-b border-gas-border">
+                    <i class="fa-solid fa-box-archive text-gas-amber"></i>
+                    <h3 class="font-display font-bold text-base text-white">PAKET PRODUK GASENTRA</h3>
+                </div>
+
+                <div class="space-y-2.5 text-xs">
+                    <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-white block">GASENTRA Lite</span>
+                            <span class="text-[11px] text-slate-400">UMKM · LPG 3 kg · Alas timbang + buzzer + WA alert</span>
+                        </div>
+                        <span class="font-mono font-bold text-gas-cyan">Sewa HaaS</span>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-gas-blue/10 border border-gas-blue/40 flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-white block">GASENTRA Essential</span>
+                            <span class="text-[11px] text-slate-300">Restoran &amp; Kafe · Katup Otomatis + Cek Isi + Tukar Tepat</span>
+                        </div>
+                        <span class="font-mono font-bold text-gas-emerald">/ Tabung / Bln</span>
+                    </div>
+
+                    <div class="p-3 rounded-xl bg-purple-950/20 border border-purple-500/40 flex justify-between items-center">
+                        <div>
+                            <span class="font-bold text-white block">GASENTRA Enterprise</span>
+                            <span class="text-[11px] text-slate-300">Hotel &amp; Multi-Outlet · Integrasi POS + ESG + Transisi Energi</span>
+                        </div>
+                        <span class="font-mono font-bold text-purple-300">Multi-Outlet</span>
+                    </div>
+                </div>
+            </div>
+
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-gas-border py-8 px-4 text-center text-xs text-slate-400 space-y-3">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-3">
+                <img src="logo-icon.svg" alt="GASENTRA" class="w-7 h-7">
+                <div class="text-left">
+                    <span class="font-display font-bold text-white block text-sm">GASENTRA</span>
+                    <span class="text-[11px] text-slate-400">Aman. Utuh. Terpakai. Siap beralih ke energi bersih.</span>
+                </div>
+            </div>
+            <div class="text-[11px] text-slate-400 sm:text-right">
+                CATALYST SUMMIT 2026 BUSINESS PLAN COMPETITION<br>
+                <span class="text-gas-cyan font-semibold">SRE Universitas Airlangga</span>
+            </div>
+        </div>
+    </footer>
+
+</body>
+</html>

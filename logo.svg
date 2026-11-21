@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 80" fill="none">
+  <defs>
+    <linearGradient id="logoFlame" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#00f0ff"/>
+      <stop offset="50%" stop-color="#0284c7"/>
+      <stop offset="100%" stop-color="#2563eb"/>
+    </linearGradient>
+    <linearGradient id="logoRing" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#00f0ff"/>
+      <stop offset="100%" stop-color="#10b981"/>
+    </linearGradient>
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#e2e8f0"/>
+    </linearGradient>
+    <filter id="logoGlow" x="-20%" y="-20%" width="140%" height="140%">
+      <feGaussianBlur stdDeviation="3" result="blur" />
+      <feComposite in="SourceGraphic" in2="blur" operator="over"/>
+    </filter>
+  </defs>
+
+  <!-- Icon Section -->
+  <g transform="translate(10, 8)">
+    <!-- Base Platform -->
+    <rect width="64" height="64" rx="16" fill="#0b1728" stroke="url(#logoRing)" stroke-width="1.5" stroke-opacity="0.6"/>
+    <!-- Smart Scale Base Ring -->
+    <ellipse cx="32" cy="48" rx="22" ry="7" fill="#070e18" stroke="url(#logoRing)" stroke-width="2" filter="url(#logoGlow)"/>
+    <ellipse cx="32" cy="48" rx="13" ry="4" fill="#050a12" stroke="#00f0ff" stroke-width="1" stroke-dasharray="3 2"/>
+
+    <!-- Gas Flame in Center -->
+    <path d="M32 14C32 14 39 23 39 30C39 35.5228 35.866 40 32 40C28.134 40 25 35.5228 25 30C25 23 32 14 32 14Z" fill="url(#logoFlame)" filter="url(#logoGlow)"/>
+    <!-- Inner Flame Core -->
+    <path d="M32 22C32 22 35.5 27 35.5 31C35.5 33.8 33.9 36 32 36C30.1 36 28.5 33.8 28.5 31C28.5 27 32 22 32 22Z" fill="#ffffff" opacity="0.95"/>
+
+    <!-- Indicator Dots -->
+    <circle cx="16" cy="48" r="2" fill="#10b981"/>
+    <circle cx="48" cy="48" r="2" fill="#00f0ff"/>
+  </g>
+
+  <!-- Typography -->
+  <g transform="translate(88, 18)">
+    <!-- Brand Name -->
+    <text x="0" y="32" font-family="'Orbitron', 'Plus Jakarta Sans', system-ui, sans-serif" font-weight="900" font-size="30" letter-spacing="3" fill="url(#textGrad)">
+      GAS<tspan fill="#00f0ff">ENTRA</tspan>
+    </text>
+    
+    <!-- Tagline Badge -->
+    <text x="2" y="49" font-family="'Plus Jakarta Sans', system-ui, sans-serif" font-weight="600" font-size="9" letter-spacing="1.5" fill="#94a3b8">
+      SMART LPG TELEMETRY &amp; SAFETY
+    </text>
+
+    <!-- Catalyst 2026 indicator -->
+    <rect x="236" y="18" width="56" height="16" rx="4" fill="#0369a1" fill-opacity="0.25" stroke="#0ea5e9" stroke-width="1"/>
+    <text x="264" y="29.5" text-anchor="middle" font-family="'Orbitron', monospace" font-size="8" font-weight="700" fill="#38bdf8" letter-spacing="0.5">
+      IOT v2.6
+    </text>
+  </g>
+</svg>

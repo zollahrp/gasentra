@@ -1,0 +1,1616 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GASENTRA - Hardware Mockup Studio | Dual-Device IoT Architecture</title>
+    <meta name="description" content="Studio Interaktif Mockup Perangkat Keras GASENTRA: Modul Sensor Gas + Timbangan per Tabung dan Central Industrial Gateway dengan Katup Otomatis.">
+    <meta name="theme-color" content="#070e18">
+    <meta name="color-scheme" content="dark">
+
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        display: ['"Orbitron"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        gas: {
+                            bg: '#070e18',
+                            surface: '#0c1726',
+                            card: '#111f35',
+                            border: '#1e3352',
+                            cyan: '#00f0ff',
+                            blue: '#0284c7',
+                            flame: '#2563eb',
+                            amber: '#f59e0b',
+                            red: '#ef4444',
+                            emerald: '#10b981',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            background-color: #070e18;
+            color: #f1f5f9;
+            overflow-x: hidden;
+        }
+        .glass-panel {
+            background: rgba(12, 23, 38, 0.75);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(30, 51, 82, 0.8);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+        }
+        .glow-red {
+            box-shadow: 0 0 25px rgba(239, 68, 68, 0.4);
+        }
+        .glow-emerald {
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.25);
+        }
+        .tech-grid {
+            background-size: 32px 32px;
+            background-image: 
+                linear-gradient(to right, rgba(255, 255, 255, 0.03) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(255, 255, 255, 0.03) 1px, transparent 1px);
+        }
+        /* Custom scrollbars */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #070e18;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #1e3352;
+            border-radius: 3px;
+        }
+        ::-webkit-scrollbar-thumb:hover {
+            background: #00f0ff;
+        }
+    </style>
+</head>
+<body class="tech-grid min-h-screen flex flex-col font-sans selection:bg-gas-cyan selection:text-black">
+
+    <!-- Top Navigation Bar -->
+    <header class="sticky top-0 z-50 glass-panel border-b border-gas-border px-4 lg:px-8 py-3">
+        <div class="max-w-7xl mx-auto flex items-center justify-between">
+            <div class="flex items-center gap-3">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <img src="logo-icon.svg" alt="GASENTRA" class="w-10 h-10 transition-transform group-hover:scale-105">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-display font-black text-xl tracking-wider text-white">GAS<span class="text-gas-cyan">ENTRA</span></span>
+                            <span class="px-2 py-0.5 text-[10px] font-display font-semibold bg-gas-blue/20 text-gas-cyan border border-gas-blue/40 rounded">HARDWARE LAB</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Mockup & Spesifikasi Perangkat Keras IoT v2.6</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Navigation Links -->
+            <div class="flex items-center gap-2 sm:gap-4">
+                <a href="index.html" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-house"></i>
+                    <span class="hidden sm:inline">Portal Utama</span>
+                </a>
+                <a href="dashboard.html" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-chart-line text-gas-emerald"></i>
+                    <span class="hidden sm:inline">Dashboard Web</span>
+                </a>
+                <a href="digital-twin-3d.html" class="px-3 py-1.5 rounded-lg text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800/60 transition flex items-center gap-1.5">
+                    <i class="fa-solid fa-cubes text-gas-cyan"></i>
+                    <span class="hidden sm:inline">3D Digital Twin</span>
+                </a>
+                <div class="h-5 w-px bg-gas-border"></div>
+                <button onclick="toggleAudio()" id="audioToggleBtn" class="px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 hover:text-slate-200 transition flex items-center gap-1.5 border border-slate-700" title="Audio Alarm Beeper">
+                    <i class="fa-solid fa-volume-xmark" id="audioIcon"></i>
+                    <span class="text-[10px] hidden md:inline">Audio Sfx</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <!-- Subheader: Device Tab Switcher -->
+    <div class="bg-gas-surface/90 border-b border-gas-border px-4 py-3">
+        <div class="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-3">
+            <div class="flex items-center gap-2">
+                <span class="text-xs font-medium text-slate-400">Pilih Perangkat:</span>
+                <div class="inline-flex p-1 rounded-xl bg-gas-bg border border-gas-border">
+                    <button onclick="switchDevice('sensor-pad')" id="tabBtnPad" class="px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-gas-blue text-white shadow-lg shadow-gas-blue/20">
+                        <i class="fa-solid fa-scale-balanced"></i>
+                        <span>1. Modul Timbangan & Sensor Gas (Pad)</span>
+                    </button>
+                    <button onclick="switchDevice('gateway')" id="tabBtnGateway" class="px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-slate-200">
+                        <i class="fa-solid fa-server"></i>
+                        <span>2. Central Industrial Gateway & Katup</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Clarification Badge confirming user's question -->
+            <div class="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-emerald-500/10 border border-emerald-500/30 text-emerald-300 text-xs">
+                <i class="fa-solid fa-circle-check text-emerald-400"></i>
+                <span><strong>Konfirmasi Arsitektur:</strong> Timbangan + Sensor Gas = <strong>1 Unit Alas Terintegrasi</strong> per Tabung.</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Container -->
+    <main class="max-w-7xl mx-auto px-4 lg:px-8 py-6 flex-1 w-full space-y-8">
+
+        <!-- ========================================================================= -->
+        <!-- VIEW 1: DEVICE 1 - SMART SCALE & SENSOR PAD (MODUL PER TABUNG)           -->
+        <!-- ========================================================================= -->
+        <section id="deviceSectionPad" class="space-y-6">
+            
+            <!-- Top Hero Card -->
+            <div class="glass-panel rounded-2xl p-6 border-gas-border relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-gas-cyan/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                    <div class="space-y-2 max-w-2xl">
+                        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-gas-cyan/10 border border-gas-cyan/30 text-gas-cyan text-xs font-mono font-semibold">
+                            <i class="fa-solid fa-microchip"></i> HARDWARE UNIT 01 · PER-CYLINDER EDGE NODE
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-display font-black text-white">
+                            GASENTRA Smart Base Pad <span class="text-gas-cyan">(Timbangan + Sensor Gas)</span>
+                        </h1>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Alas pintar heavy-duty terintegrasi yang diletakkan langsung di bawah setiap tabung LPG (3 kg, 12 kg, dan 50 kg). Menggabungkan <strong>4-Point Shear Beam Load Cells</strong> dengan <strong>Perimeter Dual Gas Sniffer Chamber</strong> dalam satu cangkang anti-ledakan (ATEX Zone 2 Certified). Gas LPG yang memiliki massa jenis lebih berat dari udara (&plusmn;1.8&times; udara) otomatis mengendap ke bibir alas timbang untuk deteksi kebocoran tingkat mikro (&lt;50 ppm).
+                        </p>
+                    </div>
+
+                    <!-- Quick Spec Badges -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-center">
+                            <span class="block text-[10px] text-slate-400 font-mono">SENSOR GAS</span>
+                            <span class="font-display font-bold text-sm text-gas-cyan">MQ-6 + Catalytic</span>
+                            <span class="block text-[10px] text-slate-500">Dual-Chamber Sniffer</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-center">
+                            <span class="block text-[10px] text-slate-400 font-mono">TIMBANGAN</span>
+                            <span class="font-display font-bold text-sm text-gas-emerald">4x Load Cells</span>
+                            <span class="block text-[10px] text-slate-500">Akurasi &plusmn;5g (24-bit ADC)</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-center">
+                            <span class="block text-[10px] text-slate-400 font-mono">DAYA BATERAI</span>
+                            <span class="font-display font-bold text-sm text-gas-amber">18+ Bulan</span>
+                            <span class="block text-[10px] text-slate-500">LiFePO4 6000mAh</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-center">
+                            <span class="block text-[10px] text-slate-400 font-mono">SAFETY RATING</span>
+                            <span class="font-display font-bold text-sm text-purple-400">ATEX / IP66</span>
+                            <span class="block text-[10px] text-slate-500">Anti-Percikan / Sparkless</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive 3D Mockup & Live Simulation Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- 3D Canvas Mockup Column (7 cols) -->
+                <div class="lg:col-span-7 glass-panel rounded-2xl p-4 border-gas-border flex flex-col relative">
+                    <div class="flex items-center justify-between pb-3 border-b border-gas-border mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-gas-cyan animate-pulse"></span>
+                            <h2 class="font-display font-bold text-sm text-white">INTERACTIVE 3D MOCKUP VIEWER</h2>
+                            <span class="text-[11px] font-mono text-slate-400">(Drag 360° · Scroll Zoom)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="resetPad3DCamera()" class="px-2.5 py-1 text-xs rounded-md bg-gas-card hover:bg-slate-700 text-slate-300 font-medium transition" title="Reset View">
+                                <i class="fa-solid fa-arrows-rotate"></i> Reset
+                            </button>
+                            <button onclick="togglePadExplodedView()" id="explodedBtn" class="px-3 py-1 text-xs rounded-md bg-gas-blue hover:bg-blue-600 text-white font-bold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-layer-group"></i> <span id="explodedBtnText">Bongkar Lapisan (Exploded)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3D Viewport Container -->
+                    <div id="pad3dViewport" class="w-full h-[400px] sm:h-[480px] rounded-xl overflow-hidden relative bg-[#040810] border border-slate-800/80">
+                        <!-- Canvas will mount here -->
+                        
+                        <!-- Floating 3D Overlays / Callout Badges -->
+                        <div class="absolute top-3 left-3 pointer-events-none flex flex-col gap-2 z-10">
+                            <div class="px-2.5 py-1 rounded bg-black/70 backdrop-blur border border-gas-border text-[11px] font-mono text-gas-cyan">
+                                STATUS: <span id="overlayPadStatusText" class="font-bold text-emerald-400">NORMAL / STANDBY</span>
+                            </div>
+                            <div class="px-2.5 py-1 rounded bg-black/70 backdrop-blur border border-gas-border text-[11px] font-mono text-slate-300">
+                                TABUNG: <span id="overlayCylinderSize" class="font-bold text-white">12 kg Bright Gas</span>
+                            </div>
+                        </div>
+
+                        <!-- 3D Controls Legend -->
+                        <div class="absolute bottom-3 left-3 pointer-events-none z-10">
+                            <div class="px-3 py-1.5 rounded-lg bg-black/60 backdrop-blur border border-slate-800 text-[10px] text-slate-400 flex items-center gap-3">
+                                <span><i class="fa-solid fa-computer-mouse text-gas-cyan"></i> Klik &amp; Geser: Rotasi</span>
+                                <span><i class="fa-solid fa-arrows-up-down text-gas-cyan"></i> Scroll: Zoom</span>
+                                <span><i class="fa-solid fa-hand text-gas-cyan"></i> Klik Kanan: Pan</span>
+                            </div>
+                        </div>
+
+                        <!-- 360 Halo Indicator in Canvas (Visual Legend) -->
+                        <div class="absolute bottom-3 right-3 pointer-events-none z-10">
+                            <div id="haloStatusBadge" class="px-3 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs font-mono flex items-center gap-2">
+                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                                <span id="haloStatusLabel">360° Halo LED: AMAN (Hijau)</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Exploded View Anatomy Labels (visible when exploded) -->
+                    <div id="explodedLegend" class="mt-3 p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-xs text-slate-300 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-slate-300"></span>
+                            <span><strong>1.</strong> Platter Stainless Steel</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-gas-cyan"></span>
+                            <span><strong>2.</strong> Sniffer Chamber &amp; Grille</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-gas-emerald"></span>
+                            <span><strong>3.</strong> 4x Load Cell Array</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-purple-400"></span>
+                            <span><strong>4.</strong> Sparkless Mainboard &amp; RF</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Hardware Sandbox & Controls Column (5 cols) -->
+                <div class="lg:col-span-5 space-y-4">
+                    
+                    <!-- Sandbox Control Box -->
+                    <div class="glass-panel rounded-2xl p-5 border-gas-border space-y-4">
+                        <div class="flex items-center justify-between pb-2 border-b border-gas-border">
+                            <h3 class="font-display font-bold text-sm text-white flex items-center gap-2">
+                                <i class="fa-solid fa-sliders text-gas-cyan"></i> HARDWARE SIMULATOR
+                            </h3>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-gas-card text-slate-400 border border-gas-border">REAL-TIME ADC</span>
+                        </div>
+
+                        <!-- Cylinder Type Selector -->
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-slate-300 flex justify-between">
+                                <span>Pilih Tipe Tabung LPG:</span>
+                                <span id="selectedCylLabel" class="text-gas-cyan font-mono text-[11px]">12 kg (Standar Resto)</span>
+                            </label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setSimCylinder('3kg')" id="btnCyl3kg" class="py-2 px-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition">
+                                    <span class="block text-amber-400 font-bold">3 kg</span>
+                                    <span class="text-[10px] text-slate-400">Melon UMKM</span>
+                                </button>
+                                <button onclick="setSimCylinder('12kg')" id="btnCyl12kg" class="py-2 px-2 rounded-lg text-xs font-semibold border border-gas-cyan bg-gas-blue/20 text-white text-center transition ring-1 ring-gas-cyan">
+                                    <span class="block text-gas-cyan font-bold">12 kg</span>
+                                    <span class="text-[10px] text-slate-300">Bright Gas</span>
+                                </button>
+                                <button onclick="setSimCylinder('50kg')" id="btnCyl50kg" class="py-2 px-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition">
+                                    <span class="block text-purple-400 font-bold">50 kg</span>
+                                    <span class="text-[10px] text-slate-400">Komersial/Hotel</span>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Slider 1: Sisa Isi LPG (Berat) -->
+                        <div class="space-y-2 bg-gas-bg/60 p-3 rounded-xl border border-gas-border">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-weight-scale text-gas-emerald"></i> Berat Isi Gas (Netto)
+                                </span>
+                                <span class="font-mono font-bold text-gas-emerald text-sm" id="valWeightNetto">8.60 kg <span class="text-xs text-slate-400">(72%)</span></span>
+                            </div>
+                            <input type="range" id="sliderWeight" min="0" max="12" step="0.1" value="8.6" oninput="updateSimWeight(this.value)" class="w-full accent-emerald-500 cursor-pointer">
+                            <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                                <span>0 kg (Kosong)</span>
+                                <span>Gross: <span id="valWeightGross" class="text-white">23.70 kg</span> (Tare: 15.1 kg)</span>
+                                <span id="valWeightMaxLabel">12.0 kg (Penuh)</span>
+                            </div>
+                        </div>
+
+                        <!-- Slider 2: Konsentrasi Gas Sekitar (PPM) -->
+                        <div class="space-y-2 bg-gas-bg/60 p-3 rounded-xl border border-gas-border">
+                            <div class="flex items-center justify-between text-xs">
+                                <span class="font-medium text-slate-300 flex items-center gap-1.5">
+                                    <i class="fa-solid fa-wind text-gas-cyan"></i> Gas Sniffer Concentration
+                                </span>
+                                <span class="font-mono font-bold text-sm" id="valGasPpm">24 ppm <span class="text-xs text-emerald-400 font-sans">[Aman]</span></span>
+                            </div>
+                            <input type="range" id="sliderPpm" min="0" max="1500" step="10" value="24" oninput="updateSimPpm(this.value)" class="w-full accent-cyan-400 cursor-pointer">
+                            <div class="flex justify-between text-[10px] font-mono text-slate-400">
+                                <span>0 ppm</span>
+                                <span class="text-amber-400">200 ppm (Warning)</span>
+                                <span class="text-red-400">500+ ppm (Leak!)</span>
+                            </div>
+                        </div>
+
+                        <!-- Quick Scenario Buttons -->
+                        <div class="space-y-1.5">
+                            <span class="text-[11px] font-semibold text-slate-400 block">Skenario Uji Cepat:</span>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="triggerPadScenario('normal')" class="py-1.5 px-2 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 transition">
+                                    1. Normal
+                                </button>
+                                <button onclick="triggerPadScenario('oplosan')" class="py-1.5 px-2 rounded-lg text-[11px] font-bold bg-slate-800 hover:bg-slate-700 text-amber-400 border border-slate-700 transition">
+                                    2. Oplosan (-0.8kg)
+                                </button>
+                                <button onclick="triggerPadScenario('leak')" class="py-1.5 px-2 rounded-lg text-[11px] font-bold bg-red-950/60 hover:bg-red-900/60 text-red-400 border border-red-800 transition">
+                                    3. Bocor Kritis!
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Hardware Diagnostics Telemetry Feed -->
+                        <div class="p-3 rounded-xl bg-black/70 border border-slate-800 font-mono text-[11px] space-y-1">
+                            <div class="text-[10px] text-slate-500 font-bold border-b border-slate-800 pb-1 flex justify-between">
+                                <span>ONBOARD MCU TELEMETRY (HX711 &amp; MQ-6)</span>
+                                <span class="text-gas-cyan animate-pulse">● 20 Hz</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>ADC Raw (24-bit):</span>
+                                <span id="telemetryAdc" class="text-gas-cyan">0x7F4A21 (8,342,049)</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Load Cell Bias (Tare):</span>
+                                <span class="text-slate-400">-15.100 kg (Calibrated)</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Sniffer Voltage (Vrl):</span>
+                                <span id="telemetryVoltage" class="text-white">0.42 V (Rs/Ro: 18.4)</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>RF Signal to Gateway:</span>
+                                <span class="text-emerald-400">LoRa 915MHz · -68 dBm (SNR +9.2)</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Engineering Anatomy & Features of Pad -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Feature 1 -->
+                <div class="glass-panel p-5 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-gas-blue/20 border border-gas-blue/40 flex items-center justify-center text-gas-cyan text-lg">
+                        <i class="fa-solid fa-weight-scale"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-base">4-Point Load Cell Array</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Menggunakan 4 unit sensor geser (*shear beam*) mikro yang diposisikan secara simetris di empat sudut lingkaran alas. Desain ini memastikan akurasi timbangan tetap konsisten &plusmn;5 gram meskipun posisi tabung tidak tepat di tengah (*off-center loading*).
+                    </p>
+                    <ul class="text-[11px] text-slate-400 space-y-1 font-mono">
+                        <li>• Kapasitas Maksimum: 120 kg per unit</li>
+                        <li>• Konverter: 24-Bit Sigma-Delta ADC</li>
+                        <li>• Auto-Tare cerdas saat penggantian tabung</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 2 -->
+                <div class="glass-panel p-5 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-cyan-500/20 border border-cyan-500/40 flex items-center justify-center text-gas-cyan text-lg">
+                        <i class="fa-solid fa-fan"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-base">Perimeter Sniffer Chamber</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Saluran aliran udara sirkular berongga di sekeliling pinggiran alas. Karena gas LPG (propana &amp; butana) 1.8 kali lebih berat dari udara bebas, kebocoran halus akan merayap ke bawah dan terhisap masuk ke bilik sensor sebelum sempat tercium oleh hidung manusia.
+                    </p>
+                    <ul class="text-[11px] text-slate-400 space-y-1 font-mono">
+                        <li>• Waktu Respon Sensor: &lt; 1.5 detik</li>
+                        <li>• Deteksi Selektif: Butana (C4H10) &amp; Propana</li>
+                        <li>• Kompensasi Suhu &amp; Kelembaban onboard</li>
+                    </ul>
+                </div>
+
+                <!-- Feature 3 -->
+                <div class="glass-panel p-5 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-400 text-lg">
+                        <i class="fa-solid fa-shield-halved"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-base">ATEX Zone 2 &amp; Halo LED</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Cangkang berbahan komposit aluminium die-cast dan polimer tahan benturan dengan standar anti-percikan listrik (*intrinsically safe*). Dilengkapi lampu LED cincin 360&deg; yang dapat dilihat dari seluruh penjuru dapur dan buzzer lokal 85 dB.
+                    </p>
+                    <ul class="text-[11px] text-slate-400 space-y-1 font-mono">
+                        <li>• Standar Keselamatan: IP66 &amp; ATEX Zone 2</li>
+                        <li>• Visual Halo: Hijau (OK), Kuning, Merah</li>
+                        <li>• Baterai: 6000mAh LiFePO4 ultra-safe</li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+
+        <!-- ========================================================================= -->
+        <!-- VIEW 2: DEVICE 2 - INDUSTRIAL CENTRAL GATEWAY & VALVE CONTROLLER          -->
+        <!-- ========================================================================= -->
+        <section id="deviceSectionGateway" class="space-y-6 hidden">
+            
+            <!-- Top Hero Card -->
+            <div class="glass-panel rounded-2xl p-6 border-gas-border relative overflow-hidden">
+                <div class="absolute -right-20 -top-20 w-80 h-80 bg-gas-flame/10 rounded-full blur-3xl pointer-events-none"></div>
+                <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-6 relative z-10">
+                    <div class="space-y-2 max-w-2xl">
+                        <div class="inline-flex items-center gap-2 px-2.5 py-1 rounded-md bg-gas-blue/20 border border-gas-blue/40 text-gas-cyan text-xs font-mono font-semibold">
+                            <i class="fa-solid fa-server"></i> HARDWARE UNIT 02 · CENTRAL EDGE BRAIN &amp; ACTUATOR
+                        </div>
+                        <h1 class="text-2xl sm:text-3xl font-display font-black text-white">
+                            GASENTRA Central Industrial Gateway <span class="text-gas-cyan">&amp; Katup Otomatis</span>
+                        </h1>
+                        <p class="text-sm text-slate-300 leading-relaxed">
+                            Pusat komputasi *edge* yang dipasang di dinding dapur atau panel pipa manifold. Memproses data telemetri dari seluruh Modul Alas Tabung secara simultan menggunakan <strong>Algoritma Korelasi Multi-Sensor</strong>. Mampu mengisolasi tabung yang bocor dan memutus aliran gas melalui <strong>Katup Solenoid Otomatis</strong> dalam &lt;2.8 detik secara mandiri, <strong>100% bekerja offline tanpa bergantung pada koneksi internet</strong>.
+                        </p>
+                    </div>
+
+                    <!-- Quick Spec Badges -->
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-center">
+                            <span class="block text-[10px] text-slate-400 font-mono">EDGE PROCESSOR</span>
+                            <span class="font-display font-bold text-sm text-gas-cyan">Dual-Core 240MHz</span>
+                            <span class="block text-[10px] text-slate-500">Offline Fail-Safe</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-center">
+                            <span class="block text-[10px] text-slate-400 font-mono">VALVE CONTROL</span>
+                            <span class="font-display font-bold text-sm text-gas-red">Solenoid &lt;200ms</span>
+                            <span class="block text-[10px] text-slate-500">Auto Shut-off Relay</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-center">
+                            <span class="block text-[10px] text-slate-400 font-mono">LOCAL SIREN</span>
+                            <span class="font-display font-bold text-sm text-gas-amber">105 dB Siren</span>
+                            <span class="block text-[10px] text-slate-500">+ Strobe Hazard Light</span>
+                        </div>
+                        <div class="p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-center">
+                            <span class="block text-[10px] text-slate-400 font-mono">KONEKTIVITAS</span>
+                            <span class="font-display font-bold text-sm text-gas-emerald">LoRa + 4G + WiFi</span>
+                            <span class="block text-[10px] text-slate-500">Triple Redundancy</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interactive 3D Gateway Mockup & Controls Grid -->
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+                
+                <!-- 3D Canvas Mockup Column (7 cols) -->
+                <div class="lg:col-span-7 glass-panel rounded-2xl p-4 border-gas-border flex flex-col relative">
+                    <div class="flex items-center justify-between pb-3 border-b border-gas-border mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-gas-flame animate-pulse"></span>
+                            <h2 class="font-display font-bold text-sm text-white">INTERACTIVE 3D GATEWAY CONTROLLER</h2>
+                            <span class="text-[11px] font-mono text-slate-400">(Drag 360° · Click Buttons)</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <button onclick="resetGateway3DCamera()" class="px-2.5 py-1 text-xs rounded-md bg-gas-card hover:bg-slate-700 text-slate-300 font-medium transition">
+                                <i class="fa-solid fa-arrows-rotate"></i> Reset
+                            </button>
+                            <button onclick="toggleGatewayExplodedView()" id="explodedGwBtn" class="px-3 py-1 text-xs rounded-md bg-gas-blue hover:bg-blue-600 text-white font-bold transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-layer-group"></i> <span id="explodedGwBtnText">Bongkar Panel (Exploded)</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- 3D Viewport Container -->
+                    <div id="gateway3dViewport" class="w-full h-[400px] sm:h-[480px] rounded-xl overflow-hidden relative bg-[#040810] border border-slate-800/80">
+                        <!-- Canvas will mount here -->
+                        
+                        <!-- Floating Overlays -->
+                        <div class="absolute top-3 left-3 pointer-events-none flex flex-col gap-2 z-10">
+                            <div class="px-2.5 py-1 rounded bg-black/70 backdrop-blur border border-gas-border text-[11px] font-mono text-gas-cyan">
+                                GATEWAY ENGINE: <span class="font-bold text-emerald-400">EDGE OPERATIONAL</span>
+                            </div>
+                            <div class="px-2.5 py-1 rounded bg-black/70 backdrop-blur border border-gas-border text-[11px] font-mono text-slate-300">
+                                KATUP MANIFOLD: <span id="overlayValveStatus" class="font-bold text-emerald-400">TERBUKA (NORMAL)</span>
+                            </div>
+                        </div>
+
+                        <!-- Manual Emergency Slam Button Overlay -->
+                        <div class="absolute bottom-4 right-4 z-20">
+                            <button onclick="pressEmergencySlam()" id="slamBtn" class="px-4 py-2.5 rounded-xl bg-gradient-to-b from-red-500 to-red-700 hover:from-red-600 hover:to-red-800 text-white font-display font-black text-xs uppercase tracking-wider shadow-xl shadow-red-900/50 border-2 border-red-400 flex items-center gap-2 active:scale-95 transition">
+                                <i class="fa-solid fa-hand text-sm"></i>
+                                <span>EMERGENCY SHUTDOWN</span>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Exploded Legend for Gateway -->
+                    <div id="explodedGwLegend" class="mt-3 p-3 rounded-xl bg-gas-bg/80 border border-gas-border text-xs text-slate-300 grid grid-cols-2 sm:grid-cols-4 gap-2">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-slate-400"></span>
+                            <span><strong>1.</strong> Casing Aluminium IP65</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-gas-cyan"></span>
+                            <span><strong>2.</strong> Layar Grafis OLED 2.42"</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-gas-red"></span>
+                            <span><strong>3.</strong> Emergency Slam Switch</span>
+                        </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 rounded-full bg-gas-amber"></span>
+                            <span><strong>4.</strong> Solenoid Driver &amp; Supercap</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Gateway Controls Column (5 cols) -->
+                <div class="lg:col-span-5 space-y-4">
+                    
+                    <!-- Gateway Control Center -->
+                    <div class="glass-panel rounded-2xl p-5 border-gas-border space-y-4">
+                        <div class="flex items-center justify-between pb-2 border-b border-gas-border">
+                            <h3 class="font-display font-bold text-sm text-white flex items-center gap-2">
+                                <i class="fa-solid fa-microchip text-gas-flame"></i> KONTROL KATUP &amp; EDGE AI
+                            </h3>
+                            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-gas-card text-emerald-400 border border-gas-border">FAIL-SAFE MODE</span>
+                        </div>
+
+                        <!-- Solenoid Valve Status Card -->
+                        <div class="p-4 rounded-xl bg-gas-bg/80 border border-gas-border space-y-3">
+                            <div class="flex items-center justify-between">
+                                <span class="text-xs font-semibold text-slate-300">Status Katup Solenoid:</span>
+                                <span id="gwValveBadge" class="px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">
+                                    OPEN / ALIRAN AKTIF
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="toggleValveManual(false)" id="btnOpenValve" class="flex-1 py-2 rounded-lg text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white transition flex items-center justify-center gap-1.5 shadow-md">
+                                    <i class="fa-solid fa-lock-open"></i> Buka Katup
+                                </button>
+                                <button onclick="toggleValveManual(true)" id="btnCloseValve" class="flex-1 py-2 rounded-lg text-xs font-bold bg-red-700 hover:bg-red-600 text-white transition flex items-center justify-center gap-1.5 shadow-md">
+                                    <i class="fa-solid fa-lock"></i> Putus Aliran Gas
+                                </button>
+                            </div>
+                            <p class="text-[11px] text-slate-400 leading-tight">
+                                *Katup menggunakan relay kecepatan tinggi tipe bistable latching solenoid, memutus aliran pipa utama dalam tempo 180 milidetik saat terdeteksi anomali.
+                            </p>
+                        </div>
+
+                        <!-- OLED Screen Mode Toggle -->
+                        <div class="space-y-1.5">
+                            <label class="text-xs font-semibold text-slate-300 flex justify-between">
+                                <span>Mode Tampilan Layar OLED Gateway:</span>
+                                <span class="text-gas-cyan font-mono text-[11px]">2.42" High-Contrast</span>
+                            </label>
+                            <div class="grid grid-cols-3 gap-2">
+                                <button onclick="setOledPage('matrix')" id="oledBtnMatrix" class="py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-gas-blue text-white border border-gas-blue transition">
+                                    Ringkasan Tabung
+                                </button>
+                                <button onclick="setOledPage('correlation')" id="oledBtnCorr" class="py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-gas-card text-slate-300 border border-gas-border hover:border-gas-cyan transition">
+                                    Log Korelasi
+                                </button>
+                                <button onclick="setOledPage('network')" id="oledBtnNet" class="py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-gas-card text-slate-300 border border-gas-border hover:border-gas-cyan transition">
+                                    Jaringan &amp; POS
+                                </button>
+                            </div>
+
+                            <!-- Virtual OLED Screen Rendering -->
+                            <div class="p-3 rounded-xl bg-black border-2 border-slate-700 font-mono text-gas-cyan space-y-1.5 shadow-inner">
+                                <div class="flex justify-between items-center text-[10px] text-slate-500 border-b border-slate-800 pb-1">
+                                    <span>GASENTRA EDGE v2.6</span>
+                                    <span id="oledClock">12:00:00 WIB</span>
+                                </div>
+                                <div id="oledContent" class="text-xs space-y-1 min-h-[75px] pt-1">
+                                    <!-- Dynamic text content rendered by JS -->
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Industrial Siren & Hazard Strobe Test -->
+                        <div class="p-3 rounded-xl bg-gas-bg/60 border border-gas-border flex items-center justify-between">
+                            <div class="space-y-0.5">
+                                <span class="text-xs font-bold text-white block">Uji Sirene 105 dB &amp; Strobe</span>
+                                <span class="text-[10px] text-slate-400">Mensimulasikan peringatan darurat dapur komersial</span>
+                            </div>
+                            <button onclick="testSirenStrobe()" id="btnTestSiren" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 hover:bg-amber-500/30 transition flex items-center gap-1.5">
+                                <i class="fa-solid fa-bullhorn"></i> <span id="testSirenText">Test Sirene</span>
+                            </button>
+                        </div>
+
+                        <!-- Edge Connectivity Diagnostic -->
+                        <div class="p-3 rounded-xl bg-black/70 border border-slate-800 font-mono text-[11px] space-y-1">
+                            <div class="text-[10px] text-slate-500 font-bold border-b border-slate-800 pb-1 flex justify-between">
+                                <span>TRIPLE-REDUNDANT COMMS BUS</span>
+                                <span class="text-emerald-400">ALL LINKS UP</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Sub-1GHz LoRa Concentrator:</span>
+                                <span class="text-emerald-400">Connected (4 Pads Active)</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Local WiFi (Kitchen LAN):</span>
+                                <span class="text-emerald-400">Connected · 192.168.1.120</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>Cellular 4G LTE Cat-1 Fallback:</span>
+                                <span class="text-slate-400">Standby (Telkomsel IoT SIM)</span>
+                            </div>
+                            <div class="flex justify-between text-slate-300">
+                                <span>POS Kitchen Serial Link:</span>
+                                <span class="text-gas-cyan">RS-485 Modbus RTU OK</span>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Detailed Engineering Anatomy of Gateway -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                <!-- Gateway Feature 1 -->
+                <div class="glass-panel p-5 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-gas-blue/20 border border-gas-blue/40 flex items-center justify-center text-gas-cyan text-lg">
+                        <i class="fa-solid fa-brain"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-base">Mesin Korelasi Multi-Sensor</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Menganalisis matriks data: perubahan berat (&Delta;W/&Delta;t), laju penurunan gas, lonjakan ppm sensor gas terdekat, dan ketiadaan pesanan aktif kasir POS secara simultan. Mampu menunjuk tabung spesifik yang bermasalah dalam hitungan detik.
+                    </p>
+                    <ul class="text-[11px] text-slate-400 space-y-1 font-mono">
+                        <li>• Algoritma: Multi-Variate Thresholding</li>
+                        <li>• Deteksi kebocoran lambat (micro-leak)</li>
+                        <li>• Kebal terhadap false alarm bau masakan</li>
+                    </ul>
+                </div>
+
+                <!-- Gateway Feature 2 -->
+                <div class="glass-panel p-5 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-red-500/20 border border-red-500/40 flex items-center justify-center text-gas-red text-lg">
+                        <i class="fa-solid fa-bolt"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-base">Superkapasitor &amp; Fail-Safe Valve</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Jika listrik dapur padam atau terjadi kebakaran hebat yang merusak kabel listrik, bank superkapasitor internal menyimpan energi cadangan yang cukup untuk menggerakkan solenoid valve memutus seluruh suplai gas secara mekanis (*Normally Closed*).
+                    </p>
+                    <ul class="text-[11px] text-slate-400 space-y-1 font-mono">
+                        <li>• Waktu respon penutupan: &lt; 200 ms</li>
+                        <li>• Durasi cadangan superkapasitor: 72 jam</li>
+                        <li>• Saklar darurat manual mekanis</li>
+                    </ul>
+                </div>
+
+                <!-- Gateway Feature 3 -->
+                <div class="glass-panel p-5 rounded-2xl border-gas-border space-y-3">
+                    <div class="w-10 h-10 rounded-xl bg-amber-500/20 border border-amber-500/40 flex items-center justify-center text-gas-amber text-lg">
+                        <i class="fa-solid fa-network-wired"></i>
+                    </div>
+                    <h3 class="font-display font-bold text-white text-base">Integrasi POS &amp; Agen Gas</h3>
+                    <p class="text-xs text-slate-300 leading-relaxed">
+                        Gateway menghubungkan dapur komersial langsung ke ekosistem operasional: mengintegrasikan data tiket pesanan POS kasir untuk menghitung biaya gas per menu serta mengirim order otomatis (*auto-reorder API*) ke agen LPG resmi sebelum gas habis saat peak-hour.
+                    </p>
+                    <ul class="text-[11px] text-slate-400 space-y-1 font-mono">
+                        <li>• Protokol: MQTT, HTTPS REST, Modbus</li>
+                        <li>• Notifikasi WhatsApp &amp; SMS Darurat</li>
+                        <li>• Kompatibel sistem kasir Moka, ESB, Pawoon</li>
+                    </ul>
+                </div>
+            </div>
+
+        </section>
+
+        <!-- ========================================================================= -->
+        <!-- TECHNICAL BLUEPRINT & BILL OF MATERIALS (BOM) MODAL / SECTION             -->
+        <!-- ========================================================================= -->
+        <section class="glass-panel rounded-2xl p-6 border-gas-border space-y-6">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-gas-border gap-4">
+                <div>
+                    <h2 class="font-display font-bold text-lg text-white flex items-center gap-2">
+                        <i class="fa-solid fa-file-waveform text-gas-cyan"></i> SPESIFIKASI TEKNIK &amp; BILL OF MATERIALS (BOM)
+                    </h2>
+                    <p class="text-xs text-slate-400">Estimasi biaya manufaktur skala pilot dan spesifikasi komponen industri.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="downloadHardwareReport()" class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-gas-blue hover:bg-blue-600 text-white transition flex items-center gap-1.5">
+                        <i class="fa-solid fa-download"></i> Ekspor PDF Spek
+                    </button>
+                </div>
+            </div>
+
+            <!-- Comparison Table for Both Devices -->
+            <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs text-slate-300">
+                    <thead class="bg-gas-bg/80 text-[11px] font-mono text-gas-cyan uppercase border-b border-gas-border">
+                        <tr>
+                            <th class="py-3 px-4">Parameter Teknis</th>
+                            <th class="py-3 px-4 text-emerald-400">1. Smart Base Pad (Timbangan + Sensor)</th>
+                            <th class="py-3 px-4 text-cyan-400">2. Central Industrial Gateway</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gas-border">
+                        <tr>
+                            <td class="py-3 px-4 font-semibold text-white">Fungsi Utama</td>
+                            <td class="py-3 px-4">Mengukur berat netto tabung &amp; mendeteksi gas di permukaan bawah tabung</td>
+                            <td class="py-3 px-4">Pusat pemrosesan korelasi edge, alarm dapur, dan kontrol pemutusan katup</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-semibold text-white">Mikrokontroler</td>
+                            <td class="py-3 px-4 font-mono">ESP32-C3 / STM32 Ultra-Low Power RISC-V</td>
+                            <td class="py-3 px-4 font-mono">ESP32-S3 Dual-Core 240MHz + Edge ML Co-Processor</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-semibold text-white">Sensor Utama</td>
+                            <td class="py-3 px-4 font-mono">4x Shear Beam Load Cell (120kg) + MQ-6 &amp; Catalytic Gas</td>
+                            <td class="py-3 px-4 font-mono">Current monitor feedback valve, ambient temperature &amp; pressure</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-semibold text-white">Aktuator / Output</td>
+                            <td class="py-3 px-4 font-mono">Circular 360° RGB Halo LED + 85dB Local Buzzer</td>
+                            <td class="py-3 px-4 font-mono">Solenoid Valve Relay Driver, 105dB Siren, Red Hazard Strobe, 2.42" OLED</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-semibold text-white">Sumber Daya</td>
+                            <td class="py-3 px-4 font-mono">Baterai LiFePO4 3.2V 6000mAh (Daya tahan 18+ bulan)</td>
+                            <td class="py-3 px-4 font-mono">AC 100-240V / DC 12-24V + Supercap Backup 72 Jam</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-semibold text-white">Konektivitas</td>
+                            <td class="py-3 px-4 font-mono">LoRa Sub-GHz 915MHz / Bluetooth Mesh 5.0</td>
+                            <td class="py-3 px-4 font-mono">LoRa Concentrator, Dual-Band WiFi, 4G LTE Cat-1, RS-485 Modbus</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-semibold text-white">Dimensi Fisik</td>
+                            <td class="py-3 px-4 font-mono">&Oslash; 380 mm &times; Tinggi 38 mm (Berat: 2.1 kg)</td>
+                            <td class="py-3 px-4 font-mono">220 mm &times; 160 mm &times; 55 mm (Wall-Mounted DIN Rail)</td>
+                        </tr>
+                        <tr>
+                            <td class="py-3 px-4 font-semibold text-white">Estimasi Biaya BOM (Pilot)</td>
+                            <td class="py-3 px-4 font-mono font-bold text-emerald-400">Rp 265.000 / unit</td>
+                            <td class="py-3 px-4 font-mono font-bold text-cyan-400">Rp 440.000 / unit</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="glass-panel border-t border-gas-border py-6 px-4 text-center text-xs text-slate-400 space-y-2">
+        <div class="max-w-7xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+            <div class="flex items-center gap-2">
+                <img src="logo-icon.svg" alt="GASENTRA" class="w-6 h-6">
+                <span class="font-display font-bold text-white">GASENTRA</span>
+                <span>· Catalyst Summit 2026 Business Plan Competition</span>
+            </div>
+            <div class="text-[11px] text-slate-400">
+                SRE Universitas Airlangga · <span class="text-gas-cyan">Aman. Utuh. Terpakai. Siap Beralih ke Energi Bersih.</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Web Audio API Synthesizer for Siren & Local Beeper -->
+    <script>
+        let audioCtx = null;
+        let isAudioEnabled = false;
+        let sirenOsc = null;
+        let sirenGain = null;
+        let isSirenRunning = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function toggleAudio() {
+            initAudio();
+            isAudioEnabled = !isAudioEnabled;
+            const icon = document.getElementById('audioIcon');
+            const btn = document.getElementById('audioToggleBtn');
+            if (isAudioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-gas-cyan';
+                btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-gas-blue/20 text-gas-cyan transition flex items-center gap-1.5 border border-gas-cyan/40';
+                playBeep(880, 0.1);
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+                btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-semibold bg-slate-800 text-slate-400 transition flex items-center gap-1.5 border border-slate-700';
+                stopSirenSound();
+            }
+        }
+
+        function playBeep(freq = 600, duration = 0.15) {
+            if (!isAudioEnabled) return;
+            initAudio();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function startSirenSound() {
+            if (!isAudioEnabled || isSirenRunning) return;
+            initAudio();
+            try {
+                isSirenRunning = true;
+                sirenOsc = audioCtx.createOscillator();
+                sirenGain = audioCtx.createGain();
+                sirenOsc.type = 'sawtooth';
+                sirenGain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+
+                // Modulate frequency like emergency siren
+                const lfo = audioCtx.createOscillator();
+                lfo.frequency.setValueAtTime(2, audioCtx.currentTime); // 2 Hz cycle
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.setValueAtTime(300, audioCtx.currentTime);
+                sirenOsc.frequency.setValueAtTime(750, audioCtx.currentTime);
+
+                lfo.connect(lfoGain);
+                lfoGain.connect(sirenOsc.frequency);
+
+                sirenOsc.connect(sirenGain);
+                sirenGain.connect(audioCtx.destination);
+
+                lfo.start();
+                sirenOsc.start();
+            } catch(e) {}
+        }
+
+        function stopSirenSound() {
+            if (sirenOsc) {
+                try {
+                    sirenOsc.stop();
+                    sirenOsc.disconnect();
+                } catch(e) {}
+                sirenOsc = null;
+            }
+            isSirenRunning = false;
+        }
+    </script>
+
+    <!-- Three.js Setup & Interactive Scripts for Both Devices -->
+    <script>
+        // Global State for Devices
+        let currentDevice = 'sensor-pad';
+        let currentCylType = '12kg';
+        let currentWeightNetto = 8.6;
+        let currentGasPpm = 24;
+        let isPadExploded = false;
+        let isGatewayExploded = false;
+        let isValveClosed = false;
+        let oledInterval = null;
+
+        // --- DEVICE SWITCHER LOGIC ---
+        function switchDevice(device) {
+            currentDevice = device;
+            const secPad = document.getElementById('deviceSectionPad');
+            const secGw = document.getElementById('deviceSectionGateway');
+            const tabPad = document.getElementById('tabBtnPad');
+            const tabGw = document.getElementById('tabBtnGateway');
+
+            if (device === 'sensor-pad') {
+                secPad.classList.remove('hidden');
+                secGw.classList.add('hidden');
+                tabPad.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-gas-blue text-white shadow-lg shadow-gas-blue/20';
+                tabGw.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-slate-200';
+                if (padRenderer) padRenderer.setSize(document.getElementById('pad3dViewport').clientWidth, document.getElementById('pad3dViewport').clientHeight);
+            } else {
+                secPad.classList.add('hidden');
+                secGw.classList.remove('hidden');
+                tabGw.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 bg-gas-blue text-white shadow-lg shadow-gas-blue/20';
+                tabPad.className = 'px-4 py-1.5 rounded-lg text-xs font-bold transition flex items-center gap-2 text-slate-400 hover:text-slate-200';
+                if (!gwSceneInitialized) {
+                    initGateway3D();
+                } else if (gwRenderer) {
+                    gwRenderer.setSize(document.getElementById('gateway3dViewport').clientWidth, document.getElementById('gateway3dViewport').clientHeight);
+                }
+            }
+            playBeep(700, 0.08);
+        }
+
+        // =========================================================================
+        // THREE.JS 3D SCENE 1: SMART SCALE & SENSOR PAD (DEVICE 1)
+        // =========================================================================
+        let padScene, padCamera, padRenderer, padControls;
+        let padGroup, padPlatter, padSnifferRing, padLoadCellsGroup, padPcbGroup, padBasePlate, padHaloRingMesh;
+        let cylinder3DModel;
+
+        function initPad3D() {
+            const container = document.getElementById('pad3dViewport');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            padScene = new THREE.Scene();
+            padScene.background = new THREE.Color(0x060c16);
+            padScene.fog = new THREE.FogExp2(0x060c16, 0.04);
+
+            padCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+            padCamera.position.set(0, 5, 8);
+
+            padRenderer = new THREE.WebGLRenderer({ antialias: true });
+            padRenderer.setSize(width, height);
+            padRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            padRenderer.shadowMap.enabled = true;
+            padRenderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(padRenderer.domElement);
+
+            padControls = new THREE.OrbitControls(padCamera, padRenderer.domElement);
+            padControls.enableDamping = true;
+            padControls.dampingFactor = 0.05;
+            padControls.maxPolarAngle = Math.PI / 2 + 0.1;
+            padControls.minDistance = 3;
+            padControls.maxDistance = 18;
+
+            // Lights
+            const ambientLight = new THREE.AmbientLight(0xffffff, 0.8);
+            padScene.add(ambientLight);
+
+            const dirLight = new THREE.DirectionalLight(0x00f0ff, 1.2);
+            dirLight.position.set(5, 10, 5);
+            dirLight.castShadow = true;
+            padScene.add(dirLight);
+
+            const warmLight = new THREE.DirectionalLight(0x38bdf8, 0.8);
+            warmLight.position.set(-5, 6, -5);
+            padScene.add(warmLight);
+
+            // Ground circular pedestal
+            const floorGeo = new THREE.CylinderGeometry(6, 6.2, 0.2, 32);
+            const floorMat = new THREE.MeshStandardMaterial({
+                color: 0x091424,
+                roughness: 0.6,
+                metalness: 0.4
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.position.y = -0.1;
+            floor.receiveShadow = true;
+            padScene.add(floor);
+
+            // Tech grid circle
+            const ringGeo = new THREE.RingGeometry(3.5, 3.6, 48);
+            const ringMat = new THREE.MeshBasicMaterial({ color: 0x1e3a5f, side: THREE.DoubleSide });
+            const ring = new THREE.Mesh(ringGeo, ringMat);
+            ring.rotation.x = Math.PI / 2;
+            ring.position.y = 0.01;
+            padScene.add(ring);
+
+            // BUILD SMART PAD LAYERS
+            padGroup = new THREE.Group();
+            padScene.add(padGroup);
+
+            // Layer 4 (Bottom): Base Plate & Anti-slip rubber feet
+            padBasePlate = new THREE.Group();
+            const baseGeo = new THREE.CylinderGeometry(2.3, 2.4, 0.25, 48);
+            const baseMat = new THREE.MeshStandardMaterial({ color: 0x141f2e, metalness: 0.8, roughness: 0.3 });
+            const baseMesh = new THREE.Mesh(baseGeo, baseMat);
+            baseMesh.castShadow = true;
+            baseMesh.receiveShadow = true;
+            padBasePlate.add(baseMesh);
+
+            // Rubber Feet (4 units)
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * Math.PI) / 2 + Math.PI / 4;
+                const footGeo = new THREE.CylinderGeometry(0.2, 0.22, 0.1, 16);
+                const footMat = new THREE.MeshStandardMaterial({ color: 0x070b10, roughness: 0.9 });
+                const foot = new THREE.Mesh(footGeo, footMat);
+                foot.position.set(Math.cos(angle) * 1.8, -0.15, Math.sin(angle) * 1.8);
+                padBasePlate.add(foot);
+            }
+            padGroup.add(padBasePlate);
+
+            // Layer 3: 4x Load Cell Array & PCB Chamber
+            padLoadCellsGroup = new THREE.Group();
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * Math.PI) / 2 + Math.PI / 4;
+                const cellGeo = new THREE.BoxGeometry(0.4, 0.2, 0.7);
+                const cellMat = new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.9, roughness: 0.2 });
+                const cell = new THREE.Mesh(cellGeo, cellMat);
+                cell.position.set(Math.cos(angle) * 1.5, 0.22, Math.sin(angle) * 1.5);
+                cell.rotation.y = angle + Math.PI / 2;
+                padLoadCellsGroup.add(cell);
+            }
+
+            // Central Mainboard (PCB)
+            padPcbGroup = new THREE.Group();
+            const pcbGeo = new THREE.CylinderGeometry(1.2, 1.2, 0.05, 32);
+            const pcbMat = new THREE.MeshStandardMaterial({ color: 0x064e3b, metalness: 0.5, roughness: 0.5 });
+            const pcb = new THREE.Mesh(pcbGeo, pcbMat);
+            pcb.position.y = 0.2;
+            padPcbGroup.add(pcb);
+
+            // MCU chip on PCB
+            const chipGeo = new THREE.BoxGeometry(0.3, 0.05, 0.3);
+            const chipMat = new THREE.MeshStandardMaterial({ color: 0x111827, metalness: 0.9 });
+            const chip = new THREE.Mesh(chipGeo, chipMat);
+            chip.position.set(0, 0.24, 0);
+            padPcbGroup.add(chip);
+            padGroup.add(padLoadCellsGroup);
+            padGroup.add(padPcbGroup);
+
+            // Layer 2: Sniffer Ring & Halo 360° LED
+            padSnifferRing = new THREE.Group();
+            const snifferGeo = new THREE.TorusGeometry(2.1, 0.12, 16, 48);
+            const snifferMat = new THREE.MeshStandardMaterial({ color: 0x0369a1, metalness: 0.8, roughness: 0.3 });
+            const snifferMesh = new THREE.Mesh(snifferGeo, snifferMat);
+            snifferMesh.rotation.x = Math.PI / 2;
+            snifferMesh.position.y = 0.35;
+            padSnifferRing.add(snifferMesh);
+
+            // 360 Halo Ring LED
+            const haloGeo = new THREE.TorusGeometry(2.28, 0.06, 16, 48);
+            const haloMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+            padHaloRingMesh = new THREE.Mesh(haloGeo, haloMat);
+            padHaloRingMesh.rotation.x = Math.PI / 2;
+            padHaloRingMesh.position.y = 0.34;
+            padSnifferRing.add(padHaloRingMesh);
+            padGroup.add(padSnifferRing);
+
+            // Layer 1 (Top): Platter Stainless Steel with non-slip grooves
+            padPlatter = new THREE.Group();
+            const platterGeo = new THREE.CylinderGeometry(2.2, 2.2, 0.15, 48);
+            const platterMat = new THREE.MeshStandardMaterial({
+                color: 0x334155,
+                metalness: 0.9,
+                roughness: 0.2
+            });
+            const platterMesh = new THREE.Mesh(platterGeo, platterMat);
+            platterMesh.position.y = 0.5;
+            platterMesh.castShadow = true;
+            padPlatter.add(platterMesh);
+
+            // Non-slip rubber ring on platter
+            const rubRingGeo = new THREE.TorusGeometry(1.6, 0.05, 12, 36);
+            const rubRingMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, roughness: 0.9 });
+            const rubRing = new THREE.Mesh(rubRingGeo, rubRingMat);
+            rubRing.rotation.x = Math.PI / 2;
+            rubRing.position.y = 0.58;
+            padPlatter.add(rubRing);
+
+            padGroup.add(padPlatter);
+
+            // ADD 3D CYLINDER (LPG Bright Gas 12 kg by default)
+            build3DCylinder('12kg');
+
+            window.addEventListener('resize', onPadWindowResize);
+            animatePad3D();
+        }
+
+        function build3DCylinder(type) {
+            if (cylinder3DModel) {
+                padScene.remove(cylinder3DModel);
+            }
+            cylinder3DModel = new THREE.Group();
+
+            let colorHex = 0xdb2777; // 12kg Bright Gas Pink/Magenta
+            let radius = 1.35;
+            let height = 2.4;
+
+            if (type === '3kg') {
+                colorHex = 0x16a34a; // 3kg Melon Green
+                radius = 1.05;
+                height = 1.5;
+            } else if (type === '50kg') {
+                colorHex = 0x2563eb; // 50kg Industrial Blue
+                radius = 1.6;
+                height = 4.2;
+            }
+
+            // Cylinder Body
+            const cylGeo = new THREE.CylinderGeometry(radius, radius, height, 32);
+            const cylMat = new THREE.MeshStandardMaterial({
+                color: colorHex,
+                metalness: 0.4,
+                roughness: 0.4
+            });
+            const body = new THREE.Mesh(cylGeo, cylMat);
+            body.position.y = 0.58 + height / 2;
+            body.castShadow = true;
+            cylinder3DModel.add(body);
+
+            // Top dome
+            const domeGeo = new THREE.SphereGeometry(radius, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+            const dome = new THREE.Mesh(domeGeo, cylMat);
+            dome.position.y = 0.58 + height;
+            cylinder3DModel.add(dome);
+
+            // Top Handle Collar
+            const collarGeo = new THREE.CylinderGeometry(radius * 0.7, radius * 0.7, 0.4, 24, 1, true);
+            const collarMat = new THREE.MeshStandardMaterial({ color: colorHex, side: THREE.DoubleSide });
+            const collar = new THREE.Mesh(collarGeo, collarMat);
+            collar.position.y = 0.58 + height + 0.4;
+            cylinder3DModel.add(collar);
+
+            // Brass Valve Spindle on top
+            const valveGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.35, 16);
+            const valveMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.2 });
+            const valve = new THREE.Mesh(valveGeo, valveMat);
+            valve.position.y = 0.58 + height + 0.2;
+            cylinder3DModel.add(valve);
+
+            cylinder3DModel.position.y = 0;
+            padScene.add(cylinder3DModel);
+        }
+
+        function onPadWindowResize() {
+            const container = document.getElementById('pad3dViewport');
+            if (!container || !padRenderer || !padCamera) return;
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+            padCamera.aspect = width / height;
+            padCamera.updateProjectionMatrix();
+            padRenderer.setSize(width, height);
+        }
+
+        function animatePad3D() {
+            requestAnimationFrame(animatePad3D);
+            if (padControls) padControls.update();
+
+            // Smooth animated exploded layers
+            const targetPlatterY = isPadExploded ? 2.5 : 0.5;
+            const targetSnifferY = isPadExploded ? 1.6 : 0.35;
+            const targetLoadCellY = isPadExploded ? 0.9 : 0.22;
+            const targetCylY = isPadExploded ? 2.8 : 0;
+
+            if (padPlatter) padPlatter.position.y += (targetPlatterY - padPlatter.position.y) * 0.1;
+            if (padSnifferRing) padSnifferRing.position.y += (targetSnifferY - padSnifferRing.position.y) * 0.1;
+            if (padLoadCellsGroup) padLoadCellsGroup.position.y += (targetLoadCellY - padLoadCellsGroup.position.y) * 0.1;
+            if (cylinder3DModel) cylinder3DModel.position.y += (targetCylY - cylinder3DModel.position.y) * 0.1;
+
+            if (padRenderer && padScene && padCamera) {
+                padRenderer.render(padScene, padCamera);
+            }
+        }
+
+        function resetPad3DCamera() {
+            padCamera.position.set(0, 5, 8);
+            padControls.target.set(0, 1, 0);
+        }
+
+        function togglePadExplodedView() {
+            isPadExploded = !isPadExploded;
+            const btn = document.getElementById('explodedBtn');
+            const text = document.getElementById('explodedBtnText');
+            if (isPadExploded) {
+                btn.className = 'px-3 py-1 text-xs rounded-md bg-amber-600 hover:bg-amber-500 text-white font-bold transition flex items-center gap-1.5';
+                text.innerText = 'Tutup Lapisan (Assemble)';
+                playBeep(900, 0.1);
+            } else {
+                btn.className = 'px-3 py-1 text-xs rounded-md bg-gas-blue hover:bg-blue-600 text-white font-bold transition flex items-center gap-1.5';
+                text.innerText = 'Bongkar Lapisan (Exploded)';
+                playBeep(600, 0.1);
+            }
+        }
+
+        // --- HARDWARE SIMULATION LOGIC FOR PAD ---
+        function setSimCylinder(type) {
+            currentCylType = type;
+            const b3 = document.getElementById('btnCyl3kg');
+            const b12 = document.getElementById('btnCyl12kg');
+            const b50 = document.getElementById('btnCyl50kg');
+            const label = document.getElementById('selectedCylLabel');
+            const slider = document.getElementById('sliderWeight');
+            const overlayCyl = document.getElementById('overlayCylinderSize');
+
+            b3.className = 'py-2 px-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition';
+            b12.className = 'py-2 px-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition';
+            b50.className = 'py-2 px-2 rounded-lg text-xs font-semibold border border-gas-border bg-gas-card hover:border-gas-cyan text-slate-300 text-center transition';
+
+            if (type === '3kg') {
+                b3.className = 'py-2 px-2 rounded-lg text-xs font-semibold border border-amber-500 bg-amber-500/20 text-white text-center transition ring-1 ring-amber-500';
+                label.innerText = '3 kg (Melon UMKM)';
+                overlayCyl.innerText = '3 kg Melon Subsidi';
+                slider.max = '3';
+                slider.value = '2.2';
+            } else if (type === '12kg') {
+                b12.className = 'py-2 px-2 rounded-lg text-xs font-semibold border border-gas-cyan bg-gas-blue/20 text-white text-center transition ring-1 ring-gas-cyan';
+                label.innerText = '12 kg (Standar Restoran)';
+                overlayCyl.innerText = '12 kg Bright Gas';
+                slider.max = '12';
+                slider.value = '8.6';
+            } else {
+                b50.className = 'py-2 px-2 rounded-lg text-xs font-semibold border border-purple-500 bg-purple-500/20 text-white text-center transition ring-1 ring-purple-500';
+                label.innerText = '50 kg (Komersial Hotel)';
+                overlayCyl.innerText = '50 kg Industrial';
+                slider.max = '50';
+                slider.value = '42.0';
+            }
+            build3DCylinder(type);
+            updateSimWeight(slider.value);
+            playBeep(750, 0.08);
+        }
+
+        function updateSimWeight(val) {
+            currentWeightNetto = parseFloat(val);
+            const maxVal = parseFloat(document.getElementById('sliderWeight').max);
+            const pct = Math.round((currentWeightNetto / maxVal) * 100);
+
+            document.getElementById('valWeightNetto').innerHTML = `${currentWeightNetto.toFixed(2)} kg <span class="text-xs text-slate-400">(${pct}%)</span>`;
+            
+            // Tare calculation
+            let tare = 15.1;
+            if (currentCylType === '3kg') tare = 5.0;
+            if (currentCylType === '50kg') tare = 31.0;
+            const gross = (currentWeightNetto + tare).toFixed(2);
+            document.getElementById('valWeightGross').innerText = `${gross} kg`;
+
+            // ADC calculation simulation (24-bit representation)
+            const rawAdc = Math.round(5000000 + (gross * 142300));
+            document.getElementById('telemetryAdc').innerText = `0x${rawAdc.toString(16).toUpperCase()} (${rawAdc.toLocaleString()})`;
+        }
+
+        function updateSimPpm(ppm) {
+            currentGasPpm = parseInt(ppm);
+            const label = document.getElementById('valGasPpm');
+            const haloBadge = document.getElementById('haloStatusBadge');
+            const haloLabel = document.getElementById('haloStatusLabel');
+            const statusText = document.getElementById('overlayPadStatusText');
+
+            // Voltage calculation
+            const volts = (0.2 + (currentGasPpm / 1500) * 4.2).toFixed(2);
+            document.getElementById('telemetryVoltage').innerText = `${volts} V (MQ-6 Sniffer)`;
+
+            if (currentGasPpm < 100) {
+                label.innerHTML = `${currentGasPpm} ppm <span class="text-xs text-emerald-400 font-sans">[Aman]</span>`;
+                haloBadge.className = 'px-3 py-1.5 rounded-lg bg-emerald-950/80 border border-emerald-500/50 text-emerald-300 text-xs font-mono flex items-center gap-2';
+                haloLabel.innerText = '360° Halo LED: AMAN (Hijau)';
+                statusText.innerText = 'NORMAL / STANDBY';
+                statusText.className = 'font-bold text-emerald-400';
+                if (padHaloRingMesh) padHaloRingMesh.material.color.setHex(0x10b981);
+            } else if (currentGasPpm < 400) {
+                label.innerHTML = `${currentGasPpm} ppm <span class="text-xs text-amber-400 font-sans">[Waspada / Trace]</span>`;
+                haloBadge.className = 'px-3 py-1.5 rounded-lg bg-amber-950/80 border border-amber-500/50 text-amber-300 text-xs font-mono flex items-center gap-2';
+                haloLabel.innerText = '360° Halo LED: WASPADA (Kuning)';
+                statusText.innerText = 'PERINGATAN RESIDU GAS';
+                statusText.className = 'font-bold text-amber-400';
+                if (padHaloRingMesh) padHaloRingMesh.material.color.setHex(0xf59e0b);
+            } else {
+                label.innerHTML = `${currentGasPpm} ppm <span class="text-xs text-red-400 font-sans font-bold animate-pulse">[BAHAYA KEBOCORAN!]</span>`;
+                haloBadge.className = 'px-3 py-1.5 rounded-lg bg-red-950/90 border border-red-500 text-red-300 text-xs font-mono flex items-center gap-2 animate-pulse';
+                haloLabel.innerText = '360° Halo LED: BOCOR (Merah Berkedip)';
+                statusText.innerText = 'BAHAYA KEBOCORAN LPG!';
+                statusText.className = 'font-bold text-red-400 animate-pulse';
+                if (padHaloRingMesh) padHaloRingMesh.material.color.setHex(0xef4444);
+                playBeep(920, 0.2);
+            }
+        }
+
+        function triggerPadScenario(type) {
+            const sW = document.getElementById('sliderWeight');
+            const sP = document.getElementById('sliderPpm');
+
+            if (type === 'normal') {
+                sW.value = 8.6;
+                sP.value = 24;
+            } else if (type === 'oplosan') {
+                sW.value = 11.2; // Kurang 0.8kg saat tabung baru
+                sP.value = 35;
+                alert('🔍 Cek Isi Tabung Terdeteksi:\nTabung baru terdeteksi dengan berat isi 11.20 kg (Kurang 0.8 kg dari kuota resmi 12.0 kg).\nSistem menandai SPBE/Agen ini dan mencatat potensi kerugian!');
+            } else if (type === 'leak') {
+                sW.value = 4.1;
+                sP.value = 890;
+                playBeep(980, 0.4);
+            }
+            updateSimWeight(sW.value);
+            updateSimPpm(sP.value);
+        }
+
+        // =========================================================================
+        // THREE.JS 3D SCENE 2: CENTRAL INDUSTRIAL GATEWAY (DEVICE 2)
+        // =========================================================================
+        let gwScene, gwCamera, gwRenderer, gwControls;
+        let gwSceneInitialized = false;
+        let gwEnclosureGroup, gwFaceplate, gwPcb, gwOledScreen, gwSlamSwitch, gwSirenStrobe;
+
+        function initGateway3D() {
+            gwSceneInitialized = true;
+            const container = document.getElementById('gateway3dViewport');
+            const width = container.clientWidth;
+            const height = container.clientHeight;
+
+            gwScene = new THREE.Scene();
+            gwScene.background = new THREE.Color(0x060c16);
+            gwScene.fog = new THREE.FogExp2(0x060c16, 0.04);
+
+            gwCamera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+            gwCamera.position.set(0, 2, 7);
+
+            gwRenderer = new THREE.WebGLRenderer({ antialias: true });
+            gwRenderer.setSize(width, height);
+            gwRenderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            gwRenderer.shadowMap.enabled = true;
+            container.appendChild(gwRenderer.domElement);
+
+            gwControls = new THREE.OrbitControls(gwCamera, gwRenderer.domElement);
+            gwControls.enableDamping = true;
+            gwControls.dampingFactor = 0.05;
+            gwControls.minDistance = 3;
+            gwControls.maxDistance = 14;
+
+            // Lights
+            const ambient = new THREE.AmbientLight(0xffffff, 0.9);
+            gwScene.add(ambient);
+            const spotLight = new THREE.SpotLight(0x00f0ff, 1.5);
+            spotLight.position.set(4, 8, 6);
+            spotLight.castShadow = true;
+            gwScene.add(spotLight);
+
+            // Wall Panel Background
+            const wallGeo = new THREE.PlaneGeometry(12, 10);
+            const wallMat = new THREE.MeshStandardMaterial({ color: 0x0a1422, roughness: 0.8 });
+            const wall = new THREE.Mesh(wallGeo, wallMat);
+            wall.position.z = -1.5;
+            gwScene.add(wall);
+
+            // Gateway Main Assembly Group
+            gwEnclosureGroup = new THREE.Group();
+            gwScene.add(gwEnclosureGroup);
+
+            // Layer 1 (Rear): Die-cast Aluminum Chassis with DIN rail mount
+            const rearGeo = new THREE.BoxGeometry(3.6, 2.6, 0.6);
+            const rearMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.3 });
+            const rearMesh = new THREE.Mesh(rearGeo, rearMat);
+            gwEnclosureGroup.add(rearMesh);
+
+            // Layer 2: Mainboard PCB & Relays
+            gwPcb = new THREE.Group();
+            const pcbGeo = new THREE.BoxGeometry(3.2, 2.2, 0.08);
+            const pcbMat = new THREE.MeshStandardMaterial({ color: 0x064e3b, roughness: 0.5 });
+            const pcbMesh = new THREE.Mesh(pcbGeo, pcbMat);
+            pcbMesh.position.z = 0.35;
+            gwPcb.add(pcbMesh);
+
+            // Relays (Blue blocks)
+            for (let i = 0; i < 2; i++) {
+                const rGeo = new THREE.BoxGeometry(0.5, 0.4, 0.4);
+                const rMat = new THREE.MeshStandardMaterial({ color: 0x2563eb });
+                const rMesh = new THREE.Mesh(rGeo, rMat);
+                rMesh.position.set(0.8 + i * 0.6, -0.4, 0.55);
+                gwPcb.add(rMesh);
+            }
+            gwEnclosureGroup.add(gwPcb);
+
+            // Layer 3 (Front): Aluminum Faceplate with cutouts
+            gwFaceplate = new THREE.Group();
+            const faceGeo = new THREE.BoxGeometry(3.7, 2.7, 0.15);
+            const faceMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.8, roughness: 0.2 });
+            const faceMesh = new THREE.Mesh(faceGeo, faceMat);
+            faceMesh.position.z = 0.5;
+            gwFaceplate.add(faceMesh);
+
+            // OLED Screen Display (2.42 inch)
+            const oledGeo = new THREE.PlaneGeometry(1.6, 0.9);
+            const oledMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+            gwOledScreen = new THREE.Mesh(oledGeo, oledMat);
+            gwOledScreen.position.set(-0.7, 0.3, 0.59);
+            gwFaceplate.add(gwOledScreen);
+
+            // Big Emergency Red Slam Switch
+            const slamBaseGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.15, 24);
+            const slamBaseMat = new THREE.MeshStandardMaterial({ color: 0xd97706 });
+            const slamBase = new THREE.Mesh(slamBaseGeo, slamBaseMat);
+            slamBase.rotation.x = Math.PI / 2;
+            slamBase.position.set(1.1, 0.3, 0.6);
+            gwFaceplate.add(slamBase);
+
+            const slamCapGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.2, 24);
+            const slamCapMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.2 });
+            gwSlamSwitch = new THREE.Mesh(slamCapGeo, slamCapMat);
+            gwSlamSwitch.rotation.x = Math.PI / 2;
+            gwSlamSwitch.position.set(1.1, 0.3, 0.72);
+            gwFaceplate.add(gwSlamSwitch);
+
+            // High-Decibel Siren & Strobe on Top of Gateway
+            const strobeGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.4, 24);
+            const strobeMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.1, transparent: true, opacity: 0.85 });
+            gwSirenStrobe = new THREE.Mesh(strobeGeo, strobeMat);
+            gwSirenStrobe.position.set(0, 1.5, 0);
+            gwEnclosureGroup.add(gwSirenStrobe);
+
+            // External Dual Antennas (LoRa & 4G LTE)
+            const ant1Geo = new THREE.CylinderGeometry(0.04, 0.04, 1.2, 12);
+            const antMat = new THREE.MeshStandardMaterial({ color: 0x111827 });
+            const ant1 = new THREE.Mesh(ant1Geo, antMat);
+            ant1.position.set(-1.4, 1.7, 0);
+            ant1.rotation.z = -0.15;
+            gwEnclosureGroup.add(ant1);
+
+            const ant2 = new THREE.Mesh(ant1Geo, antMat);
+            ant2.position.set(1.4, 1.7, 0);
+            ant2.rotation.z = 0.15;
+            gwEnclosureGroup.add(ant2);
+
+            gwEnclosureGroup.add(gwFaceplate);
+
+            window.addEventListener('resize', onGwWindowResize);
+            animateGateway3D();
+            startOledTicker();
+        }
+
+        function onGwWindowResize() {
+            const container = document.getElementById('gateway3dViewport');
+            if (!container || !gwRenderer || !gwCamera) return;
+            gwCamera.aspect = container.clientWidth / container.clientHeight;
+            gwCamera.updateProjectionMatrix();
+            gwRenderer.setSize(container.clientWidth, container.clientHeight);
+        }
+
+        function animateGateway3D() {
+            requestAnimationFrame(animateGateway3D);
+            if (gwControls) gwControls.update();
+
+            // Exploded animation
+            const targetFaceZ = isGatewayExploded ? 1.8 : 0.5;
+            const targetPcbZ = isGatewayExploded ? 0.9 : 0.35;
+
+            if (gwFaceplate) gwFaceplate.position.z += (targetFaceZ - gwFaceplate.position.z) * 0.1;
+            if (gwPcb) gwPcb.position.z += (targetPcbZ - gwPcb.position.z) * 0.1;
+
+            // Strobe flashing if siren active
+            if (isSirenRunning && gwSirenStrobe) {
+                const flash = (Math.sin(Date.now() * 0.02) + 1) / 2;
+                gwSirenStrobe.material.color.setRGB(1, flash * 0.4, flash * 0.4);
+            }
+
+            if (gwRenderer && gwScene && gwCamera) {
+                gwRenderer.render(gwScene, gwCamera);
+            }
+        }
+
+        function resetGateway3DCamera() {
+            gwCamera.position.set(0, 2, 7);
+            gwControls.target.set(0, 0, 0);
+        }
+
+        function toggleGatewayExplodedView() {
+            isGatewayExploded = !isGatewayExploded;
+            const btn = document.getElementById('explodedGwBtn');
+            const text = document.getElementById('explodedGwBtnText');
+            if (isGatewayExploded) {
+                btn.className = 'px-3 py-1 text-xs rounded-md bg-amber-600 hover:bg-amber-500 text-white font-bold transition flex items-center gap-1.5';
+                text.innerText = 'Tutup Panel (Assemble)';
+                playBeep(900, 0.1);
+            } else {
+                btn.className = 'px-3 py-1 text-xs rounded-md bg-gas-blue hover:bg-blue-600 text-white font-bold transition flex items-center gap-1.5';
+                text.innerText = 'Bongkar Panel (Exploded)';
+                playBeep(600, 0.1);
+            }
+        }
+
+        function pressEmergencySlam() {
+            toggleValveManual(true);
+            if (gwSlamSwitch) {
+                gwSlamSwitch.position.z = 0.62;
+                setTimeout(() => { gwSlamSwitch.position.z = 0.72; }, 500);
+            }
+            testSirenStrobe(true);
+        }
+
+        function toggleValveManual(close) {
+            isValveClosed = close;
+            const badge = document.getElementById('gwValveBadge');
+            const overlay = document.getElementById('overlayValveStatus');
+
+            if (close) {
+                badge.className = 'px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-red-500/20 text-red-300 border border-red-500/40 animate-pulse';
+                badge.innerText = 'SHUT OFF / ALIRAN DIPUTUS';
+                overlay.innerText = 'DIPUTUS (AMAN)';
+                overlay.className = 'font-bold text-red-400';
+                playBeep(440, 0.3);
+            } else {
+                badge.className = 'px-2.5 py-1 rounded-md text-xs font-bold font-mono bg-emerald-500/20 text-emerald-300 border border-emerald-500/40';
+                badge.innerText = 'OPEN / ALIRAN AKTIF';
+                overlay.innerText = 'TERBUKA (NORMAL)';
+                overlay.className = 'font-bold text-emerald-400';
+                playBeep(880, 0.15);
+                stopSirenSound();
+            }
+        }
+
+        let currentOledPage = 'matrix';
+        function setOledPage(page) {
+            currentOledPage = page;
+            const bm = document.getElementById('oledBtnMatrix');
+            const bc = document.getElementById('oledBtnCorr');
+            const bn = document.getElementById('oledBtnNet');
+
+            bm.className = 'py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-gas-card text-slate-300 border border-gas-border transition';
+            bc.className = 'py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-gas-card text-slate-300 border border-gas-border transition';
+            bn.className = 'py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-gas-card text-slate-300 border border-gas-border transition';
+
+            if (page === 'matrix') bm.className = 'py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-gas-blue text-white border border-gas-blue transition';
+            if (page === 'correlation') bc.className = 'py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-gas-blue text-white border border-gas-blue transition';
+            if (page === 'network') bn.className = 'py-1.5 px-2 rounded-lg text-[11px] font-semibold bg-gas-blue text-white border border-gas-blue transition';
+            updateOledDisplay();
+        }
+
+        function updateOledDisplay() {
+            const el = document.getElementById('oledContent');
+            if (currentOledPage === 'matrix') {
+                el.innerHTML = `
+                    <div class="flex justify-between"><span>T1 (12kg): 8.6kg (72%)</span><span class="text-emerald-400">AMAN</span></div>
+                    <div class="flex justify-between"><span>T2 (12kg): 4.1kg (34%)</span><span class="${currentGasPpm > 400 ? 'text-red-400 font-bold animate-pulse' : 'text-emerald-400'}">${currentGasPpm > 400 ? 'LEAK!' : 'AMAN'}</span></div>
+                    <div class="flex justify-between"><span>T3 (12kg): 11.2kg (BARU)</span><span class="text-amber-400">KURANG 0.8kg</span></div>
+                    <div class="flex justify-between"><span>T4 (50kg): 45.5kg (91%)</span><span class="text-emerald-400">AMAN</span></div>
+                `;
+            } else if (currentOledPage === 'correlation') {
+                el.innerHTML = `
+                    <div class="text-[10px] text-slate-400">CORRELATION ENGINE: ACTIVE</div>
+                    <div>ΔW/Δt: -0.02 kg/h · PPM: ${currentGasPpm} ppm</div>
+                    <div>Order Active (POS): YES (3 Kitchen Orders)</div>
+                    <div class="text-emerald-300">Valve Action: ${isValveClosed ? 'EMERGENCY SHUT' : 'ARMED & MONITORING'}</div>
+                `;
+            } else {
+                el.innerHTML = `
+                    <div>WIFI: OK (-54dBm) · 4G: STANDBY</div>
+                    <div>LoRa RF: 4 NODES SYNC (915MHz)</div>
+                    <div>POS BRIDGE: Moka POS SYNCED</div>
+                    <div class="text-gas-cyan">CLOUD MQTT: CONNECTED (SRE CLOUD)</div>
+                `;
+            }
+        }
+
+        function startOledTicker() {
+            if (oledInterval) clearInterval(oledInterval);
+            oledInterval = setInterval(() => {
+                const now = new Date();
+                const clock = document.getElementById('oledClock');
+                if (clock) clock.innerText = now.toTimeString().split(' ')[0] + ' WIB';
+                updateOledDisplay();
+            }, 1000);
+        }
+
+        function testSirenStrobe(forceStart = false) {
+            const btnText = document.getElementById('testSirenText');
+            if (isSirenRunning && !forceStart) {
+                stopSirenSound();
+                btnText.innerText = 'Test Sirene';
+            } else {
+                if (!isAudioEnabled) toggleAudio();
+                startSirenSound();
+                btnText.innerText = 'Stop Sirene';
+                setTimeout(() => {
+                    stopSirenSound();
+                    btnText.innerText = 'Test Sirene';
+                }, 5000);
+            }
+        }
+
+        function downloadHardwareReport() {
+            alert('📄 GASENTRA Technical Blueprint & Hardware Spec Sheet v2.6 berhasil diekspor!\nMeliputi CAD orthographic diagram, pinout diagram, dan BOM komponen.');
+        }
+
+        // Initialize Pad on load
+        window.addEventListener('DOMContentLoaded', () => {
+            initPad3D();
+        });
+    </script>
+</body>
+</html>

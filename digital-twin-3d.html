@@ -1,0 +1,1313 @@
+<!DOCTYPE html>
+<html lang="id" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>GASENTRA - 3D Digital Twin Manifold Dapur Komersial</title>
+    <meta name="description" content="3D Digital Twin Interaktif Sistem Gas Manifold Dapur Komersial GASENTRA dengan Simulasi Kebocoran Tabung, Katup Solenoid Otomatis, dan Exploded View.">
+    <meta name="theme-color" content="#070e18">
+    <meta name="color-scheme" content="dark">
+
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800;900&family=Orbitron:wght@500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    
+    <!-- Three.js & OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+    
+    <!-- Font Awesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['"Plus Jakarta Sans"', 'Inter', 'sans-serif'],
+                        display: ['"Orbitron"', 'sans-serif'],
+                        mono: ['"JetBrains Mono"', 'monospace'],
+                    },
+                    colors: {
+                        gas: {
+                            bg: '#070e18',
+                            surface: '#0c1726',
+                            card: '#111f35',
+                            border: '#1e3352',
+                            cyan: '#00f0ff',
+                            blue: '#0284c7',
+                            flame: '#2563eb',
+                            amber: '#f59e0b',
+                            red: '#ef4444',
+                            emerald: '#10b981',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #070e18;
+            color: #f1f5f9;
+        }
+        #webgl-canvas-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 1;
+        }
+        .ui-layer {
+            position: relative;
+            z-index: 20;
+            pointer-events: none;
+        }
+        .interactive-ui {
+            pointer-events: auto;
+        }
+        .glass-panel {
+            background: rgba(12, 23, 38, 0.82);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(30, 51, 82, 0.85);
+        }
+        .glow-red {
+            box-shadow: 0 0 35px rgba(239, 68, 68, 0.5);
+        }
+        .glow-cyan {
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.25);
+        }
+    </style>
+</head>
+<body class="selection:bg-gas-cyan selection:text-black font-sans">
+
+    <!-- 3D Three.js Fullscreen Canvas Container -->
+    <div id="webgl-canvas-container"></div>
+
+    <!-- UI Overlay Layer -->
+    <div class="ui-layer h-full flex flex-col justify-between p-4 lg:p-6">
+        
+        <!-- TOP HEADER HUD -->
+        <header class="flex items-start justify-between gap-4">
+            <!-- Brand Badge -->
+            <div class="interactive-ui glass-panel rounded-2xl p-3 sm:p-4 flex items-center gap-3 border-gas-border shadow-2xl">
+                <a href="index.html" class="flex items-center gap-3 group">
+                    <img src="logo-icon.svg" alt="GASENTRA" class="w-10 h-10 transition-transform group-hover:scale-105">
+                    <div>
+                        <div class="flex items-center gap-2">
+                            <span class="font-display font-black text-xl tracking-wider text-white">GAS<span class="text-gas-cyan">ENTRA</span></span>
+                            <span class="px-2 py-0.5 text-[10px] font-display font-semibold bg-gas-blue/20 text-gas-cyan border border-gas-blue/40 rounded">3D TWIN</span>
+                        </div>
+                        <p class="text-[11px] text-slate-400">Digital Twin Gas Manifold &amp; Commercial Kitchen</p>
+                    </div>
+                </a>
+            </div>
+
+            <!-- Top Right Navigation & Emergency Valve Status -->
+            <div class="interactive-ui flex items-center gap-2 sm:gap-3">
+                <div id="hudValveStatusPill" class="glass-panel px-4 py-2 rounded-xl text-xs font-mono font-bold flex items-center gap-2 border-emerald-500/50 text-emerald-300">
+                    <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+                    <span id="hudValveStatusText">KATUP SOLENOID: OPEN</span>
+                </div>
+
+                <a href="hardware.html" class="glass-panel px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5 border-gas-border" title="Mockup Hardware">
+                    <i class="fa-solid fa-microchip text-gas-cyan"></i>
+                    <span class="hidden sm:inline">Hardware</span>
+                </a>
+
+                <a href="dashboard.html" class="glass-panel px-3 py-2 rounded-xl text-xs font-semibold text-slate-300 hover:text-white hover:bg-slate-800 transition flex items-center gap-1.5 border-gas-border" title="Dashboard">
+                    <i class="fa-solid fa-chart-line text-gas-emerald"></i>
+                    <span class="hidden sm:inline">Dashboard</span>
+                </a>
+
+                <button onclick="toggleAudio()" id="btnAudioToggle" class="glass-panel px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white transition flex items-center gap-1.5 border-gas-border">
+                    <i class="fa-solid fa-volume-xmark" id="audioIcon"></i>
+                </button>
+            </div>
+        </header>
+
+        <!-- FLOATING CAMERA PRESETS & CONTROLS (LEFT HUD) -->
+        <div class="interactive-ui flex flex-col gap-2 max-w-[260px] self-start mt-4">
+            <div class="glass-panel rounded-2xl p-3 border-gas-border space-y-2.5 shadow-2xl">
+                <div class="flex items-center justify-between border-b border-gas-border pb-1.5">
+                    <span class="text-[11px] font-display font-bold text-white flex items-center gap-1.5">
+                        <i class="fa-solid fa-video text-gas-cyan"></i> SUDUT PANDANG 3D
+                    </span>
+                    <span class="text-[10px] font-mono text-slate-400">CAMERA FLY-TO</span>
+                </div>
+                <div class="grid grid-cols-1 gap-1.5 text-xs">
+                    <button onclick="flyToView('overview')" id="camBtnOverview" class="py-1.5 px-2.5 rounded-lg text-left font-semibold bg-gas-blue text-white border border-gas-blue flex items-center justify-between transition">
+                        <span>1. Overview Dapur</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                    <button onclick="flyToView('manifold')" id="camBtnManifold" class="py-1.5 px-2.5 rounded-lg text-left font-semibold bg-gas-card text-slate-300 hover:text-white border border-gas-border flex items-center justify-between transition">
+                        <span>2. Stasiun Manifold Pipa</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                    <button onclick="flyToView('leak')" id="camBtnLeak" class="py-1.5 px-2.5 rounded-lg text-left font-semibold bg-gas-card text-slate-300 hover:text-white border border-gas-border flex items-center justify-between transition">
+                        <span>3. Tabung 2 (Bocor)</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                    <button onclick="flyToView('gateway')" id="camBtnGateway" class="py-1.5 px-2.5 rounded-lg text-left font-semibold bg-gas-card text-slate-300 hover:text-white border border-gas-border flex items-center justify-between transition">
+                        <span>4. Industrial Gateway</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                    <button onclick="flyToView('burner')" id="camBtnBurner" class="py-1.5 px-2.5 rounded-lg text-left font-semibold bg-gas-card text-slate-300 hover:text-white border border-gas-border flex items-center justify-between transition">
+                        <span>5. Tungku Wok Dapur</span>
+                        <i class="fa-solid fa-chevron-right text-[10px]"></i>
+                    </button>
+                </div>
+
+                <!-- Lighting Mode Switcher -->
+                <div class="pt-2 border-t border-gas-border space-y-1">
+                    <span class="text-[10px] font-mono text-slate-400 block">MODE PENCAHAYAAN:</span>
+                    <div class="grid grid-cols-3 gap-1 text-[10px] font-mono">
+                        <button onclick="setLightingMode('day')" id="lightDayBtn" class="py-1 rounded bg-gas-blue text-white text-center font-bold">Siang</button>
+                        <button onclick="setLightingMode('night')" id="lightNightBtn" class="py-1 rounded bg-gas-card text-slate-400 text-center hover:text-white">Malam</button>
+                        <button onclick="setLightingMode('emergency')" id="lightEmerBtn" class="py-1 rounded bg-gas-card text-red-400 text-center hover:bg-red-950/40">Bahaya</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- BOTTOM HUD: INTERACTIVE SIMULATION & EXPLODED CONTROLS -->
+        <footer class="interactive-ui flex flex-col md:flex-row items-center justify-between gap-4 mt-auto">
+            
+            <!-- Controls Bar -->
+            <div class="glass-panel rounded-2xl p-3 sm:p-4 border-gas-border flex flex-wrap items-center gap-3 shadow-2xl">
+                <!-- Leak Simulation Button -->
+                <button onclick="trigger3DLeakSimulation()" id="btn3DLeak" class="px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-900/40 transition">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                    <span id="btn3DLeakText">Simulasikan Bocor Tabung 2</span>
+                </button>
+
+                <!-- Exploded View Toggle -->
+                <button onclick="toggle3DExplodedView()" id="btn3DExploded" class="px-4 py-2 rounded-xl bg-gas-blue hover:bg-blue-600 text-white font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-gas-blue/20 transition">
+                    <i class="fa-solid fa-layer-group"></i>
+                    <span id="btn3DExplodedText">Bongkar Struktur Pad (Exploded)</span>
+                </button>
+
+                <!-- Reset Scene View -->
+                <button onclick="reset3DScene()" class="px-3 py-2 rounded-xl bg-gas-card hover:bg-slate-700 text-slate-300 font-semibold text-xs flex items-center gap-1.5 border border-gas-border transition">
+                    <i class="fa-solid fa-rotate-left"></i>
+                    <span>Reset</span>
+                </button>
+            </div>
+
+            <!-- Real-time HUD Telemetry Pill -->
+            <div class="glass-panel rounded-2xl p-3 border-gas-border font-mono text-xs text-slate-300 flex items-center gap-4 shadow-2xl">
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400">Gas Sniffer (T2):</span>
+                    <span id="hudGasPpm" class="font-bold text-emerald-400">22 ppm</span>
+                </div>
+                <div class="h-4 w-px bg-gas-border"></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400">Api Tungku:</span>
+                    <span id="hudFlameStatus" class="font-bold text-gas-cyan">MENYALA BIRU</span>
+                </div>
+                <div class="h-4 w-px bg-gas-border"></div>
+                <div class="flex items-center gap-2">
+                    <span class="text-slate-400">FPS:</span>
+                    <span class="text-gas-emerald font-bold" id="fpsCounter">60</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>
+
+    <!-- Web Audio API Synthesizer for Siren -->
+    <script>
+        let audioCtx = null;
+        let isAudioEnabled = false;
+        let sirenOsc = null;
+        let isSirenActive = false;
+
+        function initAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function toggleAudio() {
+            initAudio();
+            isAudioEnabled = !isAudioEnabled;
+            const icon = document.getElementById('audioIcon');
+            const btn = document.getElementById('btnAudioToggle');
+            if (isAudioEnabled) {
+                icon.className = 'fa-solid fa-volume-high text-gas-cyan';
+                btn.className = 'glass-panel px-3 py-2 rounded-xl text-xs font-semibold text-gas-cyan border-gas-cyan/50';
+                playChirp(880, 0.1);
+            } else {
+                icon.className = 'fa-solid fa-volume-xmark text-slate-400';
+                btn.className = 'glass-panel px-3 py-2 rounded-xl text-xs font-semibold text-slate-400 border-gas-border';
+                stopSiren();
+            }
+        }
+
+        function playChirp(freq, duration) {
+            if (!isAudioEnabled) return;
+            initAudio();
+            try {
+                const osc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+                gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+                osc.connect(gain);
+                gain.connect(audioCtx.destination);
+                osc.start();
+                osc.stop(audioCtx.currentTime + duration);
+            } catch(e) {}
+        }
+
+        function startSiren() {
+            if (!isAudioEnabled || isSirenActive) return;
+            initAudio();
+            try {
+                isSirenActive = true;
+                sirenOsc = audioCtx.createOscillator();
+                const gain = audioCtx.createGain();
+                sirenOsc.type = 'sawtooth';
+                gain.gain.setValueAtTime(0.2, audioCtx.currentTime);
+
+                const lfo = audioCtx.createOscillator();
+                lfo.frequency.setValueAtTime(2.5, audioCtx.currentTime);
+                const lfoGain = audioCtx.createGain();
+                lfoGain.gain.setValueAtTime(320, audioCtx.currentTime);
+                sirenOsc.frequency.setValueAtTime(800, audioCtx.currentTime);
+
+                lfo.connect(lfoGain);
+                lfoGain.connect(sirenOsc.frequency);
+                sirenOsc.connect(gain);
+                gain.connect(audioCtx.destination);
+
+                lfo.start();
+                sirenOsc.start();
+            } catch(e) {}
+        }
+
+        function stopSiren() {
+            if (sirenOsc) {
+                try {
+                    sirenOsc.stop();
+                    sirenOsc.disconnect();
+                } catch(e) {}
+                sirenOsc = null;
+            }
+            isSirenActive = false;
+        }
+    </script>
+
+    <!-- Three.js 3D Digital Twin Script -->
+    <script>
+        let scene, camera, renderer, controls;
+        let is3DExploded = false;
+        let isLeakSimulating = false;
+        let currentLighting = 'day';
+
+        // 3D Objects References
+        let padsArray = [];
+        let cylindersArray = [];
+        let solenoidValveMesh = null;
+        let gatewayMeshGroup = null;
+        let wokFlamesArray = [];
+        let stoveFlameLight = null;
+        let gasParticles = null;
+        let gasParticleGeo = null;
+        let gasParticleMat = null;
+        let gasParticlePositions = [];
+
+        // Lighting References
+        let ambientLight, mainDirLight, emergencyStrobeLight;
+
+        // Camera presets
+        const cameraPositions = {
+            overview: { pos: new THREE.Vector3(0, 7, 14), target: new THREE.Vector3(0, 2, 0) },
+            manifold: { pos: new THREE.Vector3(0, 3.5, 6.5), target: new THREE.Vector3(0, 1.8, 0) },
+            leak: { pos: new THREE.Vector3(-1.4, 2.2, 4.0), target: new THREE.Vector3(-1.4, 1.4, 0) },
+            gateway: { pos: new THREE.Vector3(3.5, 4.2, 3.5), target: new THREE.Vector3(3.2, 3.8, -1.8) },
+            burner: { pos: new THREE.Vector3(-4.8, 3.0, 3.8), target: new THREE.Vector3(-5.5, 1.4, -0.2) }
+        };
+
+        let targetCameraPos = cameraPositions.overview.pos.clone();
+        let targetControlsTarget = cameraPositions.overview.target.clone();
+
+        function init3D() {
+            const container = document.getElementById('webgl-canvas-container');
+            const width = window.innerWidth;
+            const height = window.innerHeight;
+
+            scene = new THREE.Scene();
+            scene.background = new THREE.Color(0x060c16);
+            scene.fog = new THREE.FogExp2(0x060c16, 0.035);
+
+            camera = new THREE.PerspectiveCamera(45, width / height, 0.1, 100);
+            camera.position.copy(cameraPositions.overview.pos);
+
+            renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
+            renderer.setSize(width, height);
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            container.appendChild(renderer.domElement);
+
+            controls = new THREE.OrbitControls(camera, renderer.domElement);
+            controls.enableDamping = true;
+            controls.dampingFactor = 0.05;
+            controls.maxPolarAngle = Math.PI / 2 - 0.02;
+            controls.minDistance = 2;
+            controls.maxDistance = 25;
+            controls.target.copy(cameraPositions.overview.target);
+
+            // Setup Lights
+            ambientLight = new THREE.AmbientLight(0xffffff, 0.85);
+            scene.add(ambientLight);
+
+            mainDirLight = new THREE.DirectionalLight(0x00f0ff, 1.2);
+            mainDirLight.position.set(6, 12, 8);
+            mainDirLight.castShadow = true;
+            mainDirLight.shadow.mapSize.width = 2048;
+            mainDirLight.shadow.mapSize.height = 2048;
+            scene.add(mainDirLight);
+
+            emergencyStrobeLight = new THREE.PointLight(0xff0000, 0, 20);
+            emergencyStrobeLight.position.set(0, 6, 2);
+            scene.add(emergencyStrobeLight);
+
+            // BUILD ENVIRONMENT
+            buildKitchenEnvironment();
+            buildGasManifold();
+            buildCylindersAndPads();
+            buildWallGateway();
+            buildWokCookingStation();
+            buildGasLeakParticles();
+
+            window.addEventListener('resize', onWindowResize);
+            requestAnimationFrame(renderLoop);
+        }
+
+        // --- 1. KITCHEN ENVIRONMENT ---
+        function buildKitchenEnvironment() {
+            // Epoxy Industrial Floor
+            const floorGeo = new THREE.PlaneGeometry(30, 24);
+            const floorMat = new THREE.MeshStandardMaterial({
+                color: 0x091424,
+                roughness: 0.4,
+                metalness: 0.3
+            });
+            const floor = new THREE.Mesh(floorGeo, floorMat);
+            floor.rotation.x = -Math.PI / 2;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Yellow/Black Safety Hazard Stripes in front of Manifold
+            const stripeGeo = new THREE.PlaneGeometry(12, 0.3);
+            const stripeMat = new THREE.MeshBasicMaterial({ color: 0xf59e0b });
+            const stripe = new THREE.Mesh(stripeGeo, stripeMat);
+            stripe.rotation.x = -Math.PI / 2;
+            stripe.position.set(0, 0.01, 1.8);
+            scene.add(stripe);
+
+            // Back Wall with Stainless Steel Panels
+            const wallGeo = new THREE.PlaneGeometry(30, 10);
+            const wallMat = new THREE.MeshStandardMaterial({
+                color: 0x111f35,
+                metalness: 0.6,
+                roughness: 0.4
+            });
+            const wall = new THREE.Mesh(wallGeo, wallMat);
+            wall.position.set(0, 5, -2);
+            wall.receiveShadow = true;
+            scene.add(wall);
+
+            // Stainless Panel Trim lines
+            for (let i = -12; i <= 12; i += 3) {
+                const trimGeo = new THREE.BoxGeometry(0.04, 10, 0.02);
+                const trimMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9 });
+                const trim = new THREE.Mesh(trimGeo, trimMat);
+                trim.position.set(i, 5, -1.98);
+                scene.add(trim);
+            }
+        }
+
+        // --- 2. GAS MANIFOLD PIPE SYSTEM ---
+        function buildGasManifold() {
+            const manifoldGroup = new THREE.Group();
+
+            // Main Horizontal Manifold Pipe (Yellow Industrial Gas Line)
+            const mainPipeGeo = new THREE.CylinderGeometry(0.08, 0.08, 9, 24);
+            const mainPipeMat = new THREE.MeshStandardMaterial({
+                color: 0xfacc15, // Yellow gas pipe
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const mainPipe = new THREE.Mesh(mainPipeGeo, mainPipeMat);
+            mainPipe.rotation.z = Math.PI / 2;
+            mainPipe.position.set(0, 2.2, -1.5);
+            mainPipe.castShadow = true;
+            manifoldGroup.add(mainPipe);
+
+            // In-Line Automatic Red Solenoid Emergency Valve
+            const solGeo = new THREE.BoxGeometry(0.4, 0.5, 0.4);
+            const solMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.6, roughness: 0.2 });
+            solenoidValveMesh = new THREE.Mesh(solGeo, solMat);
+            solenoidValveMesh.position.set(0, 2.2, -1.5);
+            solenoidValveMesh.castShadow = true;
+            manifoldGroup.add(solenoidValveMesh);
+
+            // Solenoid Indicator LED (Green by default)
+            const solLedGeo = new THREE.SphereGeometry(0.06, 16, 16);
+            const solLedMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+            const solLed = new THREE.Mesh(solLedGeo, solLedMat);
+            solLed.position.set(0, 2.45, -1.3);
+            solenoidValveMesh.add(solLed);
+
+            // Manifold Pressure Gauge (Analog dial)
+            const gaugeGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.08, 24);
+            const gaugeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
+            const gauge = new THREE.Mesh(gaugeGeo, gaugeMat);
+            gauge.rotation.x = Math.PI / 2;
+            gauge.position.set(1.5, 2.6, -1.45);
+            manifoldGroup.add(gauge);
+
+            // 4 Gas Down-Pipes with Brass Ball Valves connecting to hoses
+            const xPositions = [-3.0, -1.2, 0.8, 2.8];
+            xPositions.forEach((xPos, idx) => {
+                // Vertical dropper pipe
+                const dropGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.6, 16);
+                const dropMat = new THREE.MeshStandardMaterial({ color: 0xfacc15 });
+                const drop = new THREE.Mesh(dropGeo, dropMat);
+                drop.position.set(xPos, 1.9, -1.5);
+                manifoldGroup.add(drop);
+
+                // Brass Isolation Valve
+                const brassGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
+                const brassMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.2 });
+                const brass = new THREE.Mesh(brassGeo, brassMat);
+                brass.position.set(xPos, 1.6, -1.5);
+                manifoldGroup.add(brass);
+
+                // Flexible Stainless Steel Braided Hose dropping to cylinder
+                const curve = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(xPos, 1.55, -1.5),
+                    new THREE.Vector3(xPos, 1.2, -1.1),
+                    new THREE.Vector3(xPos, 1.1, -0.4)
+                ]);
+                const hoseGeo = new THREE.TubeGeometry(curve, 20, 0.03, 8, false);
+                const hoseMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.3 });
+                const hose = new THREE.Mesh(hoseGeo, hoseMat);
+                manifoldGroup.add(hose);
+            });
+
+            scene.add(manifoldGroup);
+        }
+
+        // --- 3. LPG CYLINDERS & GASENTRA SMART BASE PADS ---
+        function buildCylindersAndPads() {
+            const configs = [
+                { id: 'T1', x: -3.0, z: -0.4, type: '12kg', color: 0xdb2777, name: 'Tabung 1' },
+                { id: 'T2', x: -1.2, z: -0.4, type: '12kg', color: 0xdb2777, name: 'Tabung 2 (Leak Target)' },
+                { id: 'T3', x: 0.8, z: -0.4, type: '12kg', color: 0xdb2777, name: 'Tabung 3 (New)' },
+                { id: 'T4', x: 2.8, z: -0.4, type: '50kg', color: 0x2563eb, name: 'Tabung 4 (Industrial)' }
+            ];
+
+            configs.forEach((cfg) => {
+                // A. BUILD GASENTRA SMART BASE PAD UNDERNEATH
+                const padGroup = new THREE.Group();
+                padGroup.position.set(cfg.x, 0, cfg.z);
+
+                // Pad Base Chassis (Dark Cast Aluminum)
+                const baseGeo = new THREE.CylinderGeometry(1.05, 1.1, 0.12, 32);
+                const baseMat = new THREE.MeshStandardMaterial({ color: 0x141f2e, metalness: 0.8, roughness: 0.3 });
+                const base = new THREE.Mesh(baseGeo, baseMat);
+                base.position.y = 0.06;
+                base.receiveShadow = true;
+                padGroup.add(base);
+
+                // Internal Load Cell Blocks (visible on exploded)
+                const cellsGroup = new THREE.Group();
+                for (let i = 0; i < 4; i++) {
+                    const angle = (i * Math.PI) / 2 + Math.PI / 4;
+                    const cGeo = new THREE.BoxGeometry(0.18, 0.08, 0.28);
+                    const cMat = new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.9 });
+                    const cell = new THREE.Mesh(cGeo, cMat);
+                    cell.position.set(Math.cos(angle) * 0.7, 0.1, Math.sin(angle) * 0.7);
+                    cellsGroup.add(cell);
+                }
+                padGroup.add(cellsGroup);
+
+                // 360° Circular Halo LED Ring
+                const haloGeo = new THREE.TorusGeometry(1.04, 0.035, 12, 36);
+                const haloMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
+                const haloRing = new THREE.Mesh(haloGeo, haloMat);
+                haloRing.rotation.x = Math.PI / 2;
+                haloRing.position.y = 0.12;
+                padGroup.add(haloRing);
+
+                // Top Stainless Steel Platter
+                const platterGeo = new THREE.CylinderGeometry(1.0, 1.0, 0.06, 32);
+                const platterMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.9, roughness: 0.2 });
+                const platter = new THREE.Mesh(platterGeo, platterMat);
+                platter.position.y = 0.16;
+                platter.castShadow = true;
+                padGroup.add(platter);
+
+                scene.add(padGroup);
+                padsArray.push({ id: cfg.id, group: padGroup, platter: platter, halo: haloRing, cells: cellsGroup });
+
+                // B. BUILD 3D CYLINDER
+                const cylGroup = new THREE.Group();
+                cylGroup.position.set(cfg.x, 0.19, cfg.z);
+
+                const is50 = cfg.type === '50kg';
+                const radius = is50 ? 0.9 : 0.72;
+                const height = is50 ? 2.6 : 1.35;
+
+                // Cylinder Body
+                const bodyGeo = new THREE.CylinderGeometry(radius, radius, height, 32);
+                const bodyMat = new THREE.MeshStandardMaterial({
+                    color: cfg.color,
+                    metalness: 0.4,
+                    roughness: 0.4
+                });
+                const body = new THREE.Mesh(bodyGeo, bodyMat);
+                body.position.y = height / 2;
+                body.castShadow = true;
+                cylGroup.add(body);
+
+                // Top Rounded Dome
+                const domeGeo = new THREE.SphereGeometry(radius, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
+                const dome = new THREE.Mesh(domeGeo, bodyMat);
+                dome.position.y = height;
+                cylGroup.add(dome);
+
+                // Protective Collar Ring
+                const collarGeo = new THREE.CylinderGeometry(radius * 0.7, radius * 0.7, 0.28, 24, 1, true);
+                const collarMat = new THREE.MeshStandardMaterial({ color: cfg.color, side: THREE.DoubleSide });
+                const collar = new THREE.Mesh(collarGeo, collarMat);
+                collar.position.y = height + 0.25;
+                cylGroup.add(collar);
+
+                // Brass Valve on Top
+                const valveGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.2, 16);
+                const valveMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9 });
+                const valve = new THREE.Mesh(valveGeo, valveMat);
+                valve.position.y = height + 0.15;
+                cylGroup.add(valve);
+
+                scene.add(cylGroup);
+                cylindersArray.push({ id: cfg.id, group: cylGroup, baseHeight: 0.19 });
+            });
+        }
+
+        // --- 4. WALL-MOUNTED CENTRAL INDUSTRIAL GATEWAY ---
+        function buildWallGateway() {
+            gatewayMeshGroup = new THREE.Group();
+            gatewayMeshGroup.position.set(4.2, 3.8, -1.9);
+
+            // Gateway Enclosure
+            const boxGeo = new THREE.BoxGeometry(1.4, 1.0, 0.25);
+            const boxMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.7, roughness: 0.3 });
+            const box = new THREE.Mesh(boxGeo, boxMat);
+            box.castShadow = true;
+            gatewayMeshGroup.add(box);
+
+            // OLED Screen Glass (Blue glow)
+            const oledGeo = new THREE.PlaneGeometry(0.7, 0.4);
+            const oledMat = new THREE.MeshBasicMaterial({ color: 0x0284c7 });
+            const oled = new THREE.Mesh(oledGeo, oledMat);
+            oled.position.set(-0.25, 0.1, 0.13);
+            gatewayMeshGroup.add(oled);
+
+            // Emergency Red Slam Button
+            const slamGeo = new THREE.CylinderGeometry(0.12, 0.12, 0.08, 20);
+            const slamMat = new THREE.MeshStandardMaterial({ color: 0xdc2626 });
+            const slam = new THREE.Mesh(slamGeo, slamMat);
+            slam.rotation.x = Math.PI / 2;
+            slam.position.set(0.4, 0.1, 0.14);
+            gatewayMeshGroup.add(slam);
+
+            // High-Decibel Siren & Strobe on Top
+            const strobeGeo = new THREE.CylinderGeometry(0.14, 0.14, 0.2, 16);
+            const strobeMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.1, transparent: true, opacity: 0.8 });
+            const strobe = new THREE.Mesh(strobeGeo, strobeMat);
+            strobe.position.set(0, 0.6, 0);
+            gatewayMeshGroup.add(strobe);
+
+            // Dual Antennas
+            const antGeo = new THREE.CylinderGeometry(0.02, 0.02, 0.6, 8);
+            const antMat = new THREE.MeshStandardMaterial({ color: 0x0f172a });
+            const ant1 = new THREE.Mesh(antGeo, antMat);
+            ant1.position.set(-0.5, 0.7, 0);
+            ant1.rotation.z = -0.2;
+            gatewayMeshGroup.add(ant1);
+
+            const ant2 = new THREE.Mesh(antGeo, antMat);
+            ant2.position.set(0.5, 0.7, 0);
+            ant2.rotation.z = 0.2;
+            gatewayMeshGroup.add(ant2);
+
+            scene.add(gatewayMeshGroup);
+        }
+
+                // --- 5. HIGH-FIDELITY COMMERCIAL GAS STOVE RANGE (KOMPOR KWALI RANGE RESTORAN) ---
+        function buildWokCookingStation() {
+            const cooktopGroup = new THREE.Group();
+            cooktopGroup.position.set(-5.5, 0, -0.2);
+
+            // High-Quality Materials
+            const stainlessMat = new THREE.MeshStandardMaterial({
+                color: 0xc8d1dc,
+                metalness: 0.88,
+                roughness: 0.24
+            });
+            const darkStainlessMat = new THREE.MeshStandardMaterial({
+                color: 0x64748b,
+                metalness: 0.82,
+                roughness: 0.35
+            });
+            const castIronMat = new THREE.MeshStandardMaterial({
+                color: 0x161a20,
+                roughness: 0.88,
+                metalness: 0.15
+            });
+            const brassMat = new THREE.MeshStandardMaterial({
+                color: 0xd97706,
+                metalness: 0.92,
+                roughness: 0.2
+            });
+            const redKnobMat = new THREE.MeshStandardMaterial({
+                color: 0xdc2626,
+                roughness: 0.3,
+                metalness: 0.3
+            });
+            const blackKnobMat = new THREE.MeshStandardMaterial({
+                color: 0x0f172a,
+                roughness: 0.4,
+                metalness: 0.2
+            });
+            const chromeMat = new THREE.MeshStandardMaterial({
+                color: 0xf1f5f9,
+                metalness: 0.98,
+                roughness: 0.1
+            });
+            const wokSeasonedMat = new THREE.MeshStandardMaterial({
+                color: 0x1e2733,
+                metalness: 0.55,
+                roughness: 0.38,
+                side: THREE.DoubleSide
+            });
+            const woodHandleMat = new THREE.MeshStandardMaterial({
+                color: 0x78350f,
+                roughness: 0.7
+            });
+
+            // 1. MAIN COMMERCIAL STOVE CHASSIS (STAINLESS STEEL SUS 304)
+            // Heavy Stainless Steel Top Deck
+            const deckGeo = new THREE.BoxGeometry(3.2, 0.1, 1.35);
+            const deck = new THREE.Mesh(deckGeo, stainlessMat);
+            deck.position.y = 0.98;
+            deck.castShadow = true;
+            deck.receiveShadow = true;
+            cooktopGroup.add(deck);
+
+            // Raised Anti-Spill Perimeter Marine Lip / Drip Canal
+            const rimThick = 0.025;
+            const rimHeight = 0.04;
+            const fLip = new THREE.Mesh(new THREE.BoxGeometry(3.2, rimHeight, rimThick), stainlessMat);
+            fLip.position.set(0, 1.04, 0.66);
+            cooktopGroup.add(fLip);
+            const lLip = new THREE.Mesh(new THREE.BoxGeometry(rimThick, rimHeight, 1.35), stainlessMat);
+            lLip.position.set(-1.58, 1.04, 0);
+            cooktopGroup.add(lLip);
+            const rLip = new THREE.Mesh(new THREE.BoxGeometry(rimThick, rimHeight, 1.35), stainlessMat);
+            rLip.position.set(1.58, 1.04, 0);
+            cooktopGroup.add(rLip);
+
+            // Tall Stainless Steel Backsplash Panel (Dinding Penahan Cipratan Minyak)
+            const splashGeo = new THREE.BoxGeometry(3.2, 0.65, 0.04);
+            const splash = new THREE.Mesh(splashGeo, stainlessMat);
+            splash.position.set(0, 1.32, -0.66);
+            splash.castShadow = true;
+            cooktopGroup.add(splash);
+
+            // Backsplash Top Folded Trim
+            const splashTrim = new THREE.Mesh(new THREE.BoxGeometry(3.24, 0.04, 0.08), darkStainlessMat);
+            splashTrim.position.set(0, 1.65, -0.66);
+            cooktopGroup.add(splashTrim);
+
+            // Swivel Goose-Neck Water Faucet (Keran Air Pendingin Wok Khas Restoran)
+            const faucetGroup = new THREE.Group();
+            faucetGroup.position.set(-0.1, 1.45, -0.64);
+            const fBase = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.04, 16), chromeMat);
+            fBase.rotation.x = Math.PI / 2;
+            faucetGroup.add(fBase);
+            const faucetCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0, 0, 0),
+                new THREE.Vector3(0, 0.05, 0.12),
+                new THREE.Vector3(0, 0.22, 0.18),
+                new THREE.Vector3(-0.25, 0.22, 0.35),
+                new THREE.Vector3(-0.35, 0.12, 0.42),
+                new THREE.Vector3(-0.35, 0.04, 0.42)
+            ]);
+            const faucetPipe = new THREE.Mesh(new THREE.TubeGeometry(faucetCurve, 20, 0.02, 12, false), chromeMat);
+            faucetGroup.add(faucetPipe);
+            const fLever = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.09, 12), redKnobMat);
+            fLever.position.set(0, 0.06, 0.08);
+            fLever.rotation.z = Math.PI / 4;
+            faucetGroup.add(fLever);
+            cooktopGroup.add(faucetGroup);
+
+            // 4 Tubular Stainless Steel Legs with Leveling Feet
+            const legPositions = [
+                [-1.45, -0.52], [1.45, -0.52],
+                [-1.45, 0.52], [1.45, 0.52]
+            ];
+            legPositions.forEach(([lx, lz]) => {
+                const leg = new THREE.Mesh(new THREE.CylinderGeometry(0.05, 0.05, 0.92, 16), stainlessMat);
+                leg.position.set(lx, 0.46, lz);
+                leg.castShadow = true;
+                cooktopGroup.add(leg);
+                const foot = new THREE.Mesh(new THREE.CylinderGeometry(0.065, 0.045, 0.08, 16), chromeMat);
+                foot.position.set(lx, 0.04, lz);
+                cooktopGroup.add(foot);
+            });
+
+            // Lower Undershelf Storage Rack
+            const shelf = new THREE.Mesh(new THREE.BoxGeometry(2.95, 0.03, 1.15), darkStainlessMat);
+            shelf.position.set(0, 0.22, 0);
+            shelf.receiveShadow = true;
+            cooktopGroup.add(shelf);
+
+            // Storage Cookware on Lower Shelf
+            const shelfPot = new THREE.Mesh(new THREE.CylinderGeometry(0.24, 0.24, 0.28, 20), chromeMat);
+            shelfPot.position.set(0.85, 0.38, 0.15);
+            cooktopGroup.add(shelfPot);
+            const shelfWok = new THREE.Mesh(new THREE.SphereGeometry(0.32, 16, 8, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2), darkStainlessMat);
+            shelfWok.position.set(-0.85, 0.48, 0.1);
+            shelfWok.rotation.x = Math.PI;
+            cooktopGroup.add(shelfWok);
+
+            // 2. FRONT CONTROL APRON & GAS ROTARY KNOBS
+            const apron = new THREE.Mesh(new THREE.BoxGeometry(3.2, 0.26, 0.04), stainlessMat);
+            apron.position.set(0, 0.82, 0.68);
+            cooktopGroup.add(apron);
+
+            const insetPanel = new THREE.Mesh(new THREE.BoxGeometry(2.9, 0.18, 0.015), darkStainlessMat);
+            insetPanel.position.set(0, 0.82, 0.705);
+            cooktopGroup.add(insetPanel);
+
+            // 2 Pull-Out Stainless Steel Drip Trays (Laci Sisa Minyak)
+            [-0.78, 0.78].forEach((tx) => {
+                const trayFace = new THREE.Mesh(new THREE.BoxGeometry(1.2, 0.11, 0.02), stainlessMat);
+                trayFace.position.set(tx, 0.64, 0.68);
+                cooktopGroup.add(trayFace);
+                const tHandle = new THREE.Mesh(new THREE.CylinderGeometry(0.012, 0.012, 0.4, 12), chromeMat);
+                tHandle.rotation.z = Math.PI / 2;
+                tHandle.position.set(tx, 0.64, 0.71);
+                cooktopGroup.add(tHandle);
+            });
+
+            // 4 Heavy-Duty Commercial Rotary Gas Control Knobs
+            const knobConfigs = [
+                { x: -1.05, color: redKnobMat, rot: 1.2 },
+                { x: -0.55, color: blackKnobMat, rot: 0.8 },
+                { x: 0.55, color: redKnobMat, rot: 0.9 },
+                { x: 1.05, color: blackKnobMat, rot: 0.6 }
+            ];
+
+            knobConfigs.forEach((kc) => {
+                const kGroup = new THREE.Group();
+                kGroup.position.set(kc.x, 0.82, 0.72);
+                const bezel = new THREE.Mesh(new THREE.CylinderGeometry(0.07, 0.07, 0.015, 20), chromeMat);
+                bezel.rotation.x = Math.PI / 2;
+                kGroup.add(bezel);
+                const dial = new THREE.Mesh(new THREE.CylinderGeometry(0.052, 0.052, 0.045, 20), kc.color);
+                dial.rotation.x = Math.PI / 2;
+                dial.position.z = 0.025;
+                kGroup.add(dial);
+                const notch = new THREE.Mesh(new THREE.BoxGeometry(0.012, 0.035, 0.046), chromeMat);
+                notch.position.set(0, 0.02, 0.026);
+                notch.rotation.z = kc.rot;
+                kGroup.add(notch);
+                cooktopGroup.add(kGroup);
+            });
+
+            // 2 Piezo Electric Spark Ignition Buttons (Red buttons)
+            [-0.8, 0.8].forEach((bx) => {
+                const btn = new THREE.Mesh(new THREE.CylinderGeometry(0.025, 0.025, 0.02, 16), redKnobMat);
+                btn.rotation.x = Math.PI / 2;
+                btn.position.set(bx, 0.74, 0.715);
+                cooktopGroup.add(btn);
+            });
+
+            // 3. BURNER 1 (LEFT): ASIAN HIGH-PRESSURE KWALI WOK BURNER
+            const wokCenter = new THREE.Vector3(-0.8, 1.03, 0.0);
+
+            // Cast Iron Conical Recessed Wok Well (Mangkok Kwali Cor Besi)
+            const wokWellGeo = new THREE.CylinderGeometry(0.55, 0.38, 0.12, 32, 1, true);
+            const wokWell = new THREE.Mesh(wokWellGeo, castIronMat);
+            wokWell.position.copy(wokCenter);
+            cooktopGroup.add(wokWell);
+
+            // Raised Heavy Cast Iron Wok Ring Collar (Dudukan Wajan Kuali)
+            const wokRingGeo = new THREE.TorusGeometry(0.48, 0.055, 16, 36);
+            const wokRing = new THREE.Mesh(wokRingGeo, castIronMat);
+            wokRing.rotation.x = Math.PI / 2;
+            wokRing.position.set(wokCenter.x, 1.09, wokCenter.z);
+            cooktopGroup.add(wokRing);
+
+            // 4 Radial Cast Iron Teeth on Wok Ring
+            for (let i = 0; i < 4; i++) {
+                const angle = (i * Math.PI) / 2 + Math.PI / 4;
+                const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.08, 0.16), castIronMat);
+                tooth.position.set(
+                    wokCenter.x + Math.cos(angle) * 0.44,
+                    1.12,
+                    wokCenter.z + Math.sin(angle) * 0.44
+                );
+                tooth.rotation.y = -angle;
+                cooktopGroup.add(tooth);
+            }
+
+            // Rear Cast Iron Heat Flue Vent (Cerobong Hawa Panas Belakang)
+            const vent = new THREE.Mesh(new THREE.BoxGeometry(0.24, 0.12, 0.18), castIronMat);
+            vent.position.set(wokCenter.x, 1.08, wokCenter.z - 0.52);
+            cooktopGroup.add(vent);
+
+            // Brass High-Pressure Jet Burner Head in Center
+            const jetHead = new THREE.Mesh(new THREE.CylinderGeometry(0.18, 0.18, 0.06, 24), brassMat);
+            jetHead.position.set(wokCenter.x, 0.98, wokCenter.z);
+            cooktopGroup.add(jetHead);
+
+            // Hand-Hammered Carbon Steel Wok Pan (Wajan Kuali Restoran Berkilau Seasoning)
+            const wokGeo = new THREE.SphereGeometry(0.52, 32, 16, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+            const wok = new THREE.Mesh(wokGeo, wokSeasonedMat);
+            wok.position.set(wokCenter.x, 1.25, wokCenter.z);
+            wok.castShadow = true;
+            cooktopGroup.add(wok);
+
+            // Ergonomic Long Tubular Chef Handle with Wooden Grip
+            const handleGroup = new THREE.Group();
+            handleGroup.position.set(wokCenter.x, 1.26, wokCenter.z);
+            const hSteel = new THREE.Mesh(new THREE.CylinderGeometry(0.018, 0.018, 0.24, 12), chromeMat);
+            hSteel.position.set(0, 0.08, 0.44);
+            hSteel.rotation.x = Math.PI / 3.2;
+            handleGroup.add(hSteel);
+            const hWood = new THREE.Mesh(new THREE.CylinderGeometry(0.026, 0.024, 0.22, 16), woodHandleMat);
+            hWood.position.set(0, 0.22, 0.58);
+            hWood.rotation.x = Math.PI / 3.2;
+            handleGroup.add(hWood);
+            const earHandle = new THREE.Mesh(new THREE.TorusGeometry(0.045, 0.01, 12, 20, Math.PI), chromeMat);
+            earHandle.position.set(0, 0.02, -0.52);
+            earHandle.rotation.x = -Math.PI / 3;
+            handleGroup.add(earHandle);
+            cooktopGroup.add(handleGroup);
+
+            // DYNAMIC DUAL-RING GAS FLAME SYSTEM UNDER WOK
+            for (let i = 0; i < 20; i++) {
+                const angle = (i * Math.PI * 2) / 20;
+                const fGeo = new THREE.ConeGeometry(0.038, 0.20, 8);
+                const fMat = new THREE.MeshBasicMaterial({ color: 0x00f0ff });
+                const flame = new THREE.Mesh(fGeo, fMat);
+                flame.position.set(
+                    wokCenter.x + Math.cos(angle) * 0.28,
+                    1.02,
+                    wokCenter.z + Math.sin(angle) * 0.28
+                );
+                flame.rotation.z = -Math.cos(angle) * 0.2;
+                flame.rotation.x = Math.sin(angle) * 0.2;
+                cooktopGroup.add(flame);
+                wokFlamesArray.push(flame);
+            }
+
+            for (let i = 0; i < 8; i++) {
+                const angle = (i * Math.PI * 2) / 8;
+                const pGeo = new THREE.ConeGeometry(0.024, 0.12, 8);
+                const pMat = new THREE.MeshBasicMaterial({ color: 0xa5f3fc });
+                const pFlame = new THREE.Mesh(pGeo, pMat);
+                pFlame.position.set(
+                    wokCenter.x + Math.cos(angle) * 0.12,
+                    1.01,
+                    wokCenter.z + Math.sin(angle) * 0.12
+                );
+                cooktopGroup.add(pFlame);
+                wokFlamesArray.push(pFlame);
+            }
+
+            // Real-Time Dynamic Flame PointLight (Flickers in renderLoop)
+            stoveFlameLight = new THREE.PointLight(0x00d4ff, 2.4, 4.5);
+            stoveFlameLight.position.set(wokCenter.x, 1.08, wokCenter.z);
+            cooktopGroup.add(stoveFlameLight);
+
+            // 4. BURNER 2 (RIGHT): HEAVY-DUTY COMMERCIAL STOCKPOT SPIDER TRIVET & PANCI SUP
+            const potCenter = new THREE.Vector3(0.8, 1.03, 0.0);
+
+            // Square Cast Iron Grate Base (Tungku Cor Segiempat)
+            const grateBase = new THREE.Mesh(new THREE.BoxGeometry(0.88, 0.04, 0.88), castIronMat);
+            grateBase.position.copy(potCenter);
+            cooktopGroup.add(grateBase);
+
+            // 8 Radial Cast Iron Spider Teeth Fingers to Hold Pots
+            for (let i = 0; i < 8; i++) {
+                const angle = (i * Math.PI * 2) / 8;
+                const tooth = new THREE.Mesh(new THREE.BoxGeometry(0.065, 0.065, 0.32), castIronMat);
+                tooth.position.set(
+                    potCenter.x + Math.cos(angle) * 0.26,
+                    1.06,
+                    potCenter.z + Math.sin(angle) * 0.26
+                );
+                tooth.rotation.y = -angle;
+                cooktopGroup.add(tooth);
+            }
+
+            // Dual Brass Burner Cap in Center
+            const potBurnerCap = new THREE.Mesh(new THREE.CylinderGeometry(0.16, 0.16, 0.04, 24), brassMat);
+            potBurnerCap.position.set(potCenter.x, 1.05, potCenter.z);
+            cooktopGroup.add(potBurnerCap);
+
+            // Stockpot Simmer Flame Jets (14 mini blue cones)
+            for (let i = 0; i < 14; i++) {
+                const angle = (i * Math.PI * 2) / 14;
+                const sGeo = new THREE.ConeGeometry(0.022, 0.11, 8);
+                const sMat = new THREE.MeshBasicMaterial({ color: 0x38bdf8 });
+                const sFlame = new THREE.Mesh(sGeo, sMat);
+                sFlame.position.set(
+                    potCenter.x + Math.cos(angle) * 0.19,
+                    1.06,
+                    potCenter.z + Math.sin(angle) * 0.19
+                );
+                cooktopGroup.add(sFlame);
+                wokFlamesArray.push(sFlame);
+            }
+
+            // Commercial Stainless Steel Stockpot (Panci Kaldu Sup Restoran Besar)
+            const stockpotGroup = new THREE.Group();
+            stockpotGroup.position.set(potCenter.x, 1.10, potCenter.z);
+
+            const potBody = new THREE.Mesh(new THREE.CylinderGeometry(0.36, 0.36, 0.54, 32), chromeMat);
+            potBody.position.y = 0.27;
+            potBody.castShadow = true;
+            stockpotGroup.add(potBody);
+
+            const lid = new THREE.Mesh(new THREE.CylinderGeometry(0.38, 0.38, 0.03, 32), chromeMat);
+            lid.position.y = 0.55;
+            stockpotGroup.add(lid);
+            const lidKnob = new THREE.Mesh(new THREE.CylinderGeometry(0.04, 0.04, 0.04, 16), darkStainlessMat);
+            lidKnob.position.y = 0.58;
+            stockpotGroup.add(lidKnob);
+
+            [-0.38, 0.38].forEach((hx) => {
+                const handle = new THREE.Mesh(new THREE.TorusGeometry(0.06, 0.012, 10, 16, Math.PI), chromeMat);
+                handle.rotation.z = hx > 0 ? -Math.PI / 2 : Math.PI / 2;
+                handle.position.set(hx, 0.42, 0);
+                stockpotGroup.add(handle);
+            });
+            cooktopGroup.add(stockpotGroup);
+
+            // 5. VISIBLE GAS LINE CONNECTION FROM MANIFOLD TO STOVE
+            const gasPipeCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(1.7, 1.0, -0.65),
+                new THREE.Vector3(1.7, 1.2, -1.0),
+                new THREE.Vector3(1.7, 1.6, -1.5),
+                new THREE.Vector3(1.0, 2.2, -1.5)
+            ]);
+            const stoveGasHose = new THREE.Mesh(
+                new THREE.TubeGeometry(gasPipeCurve, 20, 0.035, 12, false),
+                new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8, roughness: 0.25 })
+            );
+            cooktopGroup.add(stoveGasHose);
+
+            const sValve = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 0.12), brassMat);
+            sValve.position.set(1.7, 1.15, -0.85);
+            cooktopGroup.add(sValve);
+            const sHandle = new THREE.Mesh(new THREE.BoxGeometry(0.02, 0.14, 0.03), new THREE.MeshStandardMaterial({ color: 0xfacc15 }));
+            sHandle.position.set(1.76, 1.2, -0.85);
+            sHandle.rotation.z = Math.PI / 4;
+            cooktopGroup.add(sHandle);
+
+            // 6. CHEF COOKING ACCESSORIES
+            const spatulaGroup = new THREE.Group();
+            spatulaGroup.position.set(-1.4, 1.04, 0.3);
+            spatulaGroup.rotation.y = -Math.PI / 5;
+            const sRod = new THREE.Mesh(new THREE.CylinderGeometry(0.008, 0.008, 0.42, 8), chromeMat);
+            sRod.rotation.x = Math.PI / 2;
+            spatulaGroup.add(sRod);
+            const sBlade = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.06, 0.005, 16, 1, false, 0, Math.PI), chromeMat);
+            sBlade.position.set(0, 0, 0.22);
+            spatulaGroup.add(sBlade);
+            cooktopGroup.add(spatulaGroup);
+
+            scene.add(cooktopGroup);
+        }
+
+        // --- 6. GAS LEAK PARTICLES (STREAMING FROM TABUNG 2) ---
+        function buildGasLeakParticles() {
+            const particleCount = 200;
+            gasParticleGeo = new THREE.BufferGeometry();
+            gasParticlePositions = new Float32Array(particleCount * 3);
+
+            for (let i = 0; i < particleCount; i++) {
+                gasParticlePositions[i * 3] = -1.2 + (Math.random() - 0.5) * 0.4;
+                gasParticlePositions[i * 3 + 1] = 1.35 + Math.random() * 0.5;
+                gasParticlePositions[i * 3 + 2] = -0.4 + (Math.random() - 0.5) * 0.4;
+            }
+
+            gasParticleGeo.setAttribute('position', new THREE.BufferAttribute(gasParticlePositions, 3));
+
+            gasParticleMat = new THREE.PointsMaterial({
+                color: 0x38bdf8,
+                size: 0.08,
+                transparent: true,
+                opacity: 0, // invisible until leak triggers
+                blending: THREE.AdditiveBlending
+            });
+
+            gasParticles = new THREE.Points(gasParticleGeo, gasParticleMat);
+            scene.add(gasParticles);
+        }
+
+        // --- ANIMATION RENDER LOOP ---
+        let lastFrameTime = performance.now();
+        let frameCount = 0;
+
+        function renderLoop(now) {
+            requestAnimationFrame(renderLoop);
+
+            // FPS Counter
+            frameCount++;
+            if (now - lastFrameTime >= 1000) {
+                document.getElementById('fpsCounter').innerText = frameCount;
+                frameCount = 0;
+                lastFrameTime = now;
+            }
+
+            // Smooth Camera Interpolation
+            camera.position.lerp(targetCameraPos, 0.05);
+            controls.target.lerp(targetControlsTarget, 0.05);
+            controls.update();
+
+            // Smooth Exploded View Layer Interpolation
+            const padExplodedTarget = is3DExploded ? 1.2 : 0.16;
+            const cylExplodedTarget = is3DExploded ? 1.5 : 0.19;
+
+            padsArray.forEach(p => {
+                p.platter.position.y += (padExplodedTarget - p.platter.position.y) * 0.08;
+            });
+            cylindersArray.forEach(c => {
+                c.group.position.y += (cylExplodedTarget - c.group.position.y) * 0.08;
+            });
+
+            // Gas Leak Particle Simulation (if leak is active)
+            if (isLeakSimulating && gasParticles) {
+                const pos = gasParticleGeo.attributes.position.array;
+                for (let i = 0; i < pos.length / 3; i++) {
+                    // Leak stream drops and swirls downwards (LPG denser than air)
+                    pos[i * 3 + 1] -= 0.02 + Math.random() * 0.01;
+                    pos[i * 3] += (Math.random() - 0.5) * 0.03;
+                    pos[i * 3 + 2] += (Math.random() - 0.5) * 0.03;
+
+                    // Reset particle when it reaches floor
+                    if (pos[i * 3 + 1] < 0.1) {
+                        pos[i * 3] = -1.2 + (Math.random() - 0.5) * 0.2;
+                        pos[i * 3 + 1] = 1.35;
+                        pos[i * 3 + 2] = -0.4 + (Math.random() - 0.5) * 0.2;
+                    }
+                }
+                gasParticleGeo.attributes.position.needsUpdate = true;
+            }
+
+            // Wok Flame Jitter & Dynamic Lighting
+            if (stoveFlameLight) {
+                if (isLeakSimulating) {
+                    stoveFlameLight.intensity = 0;
+                } else {
+                    stoveFlameLight.intensity = 2.2 + Math.sin(now * 0.03) * 0.6 + (Math.random() - 0.5) * 0.4;
+                }
+            }
+            wokFlamesArray.forEach((f, idx) => {
+                if (isLeakSimulating) {
+                    f.scale.set(0.001, 0.001, 0.001); // Flame cuts out!
+                } else {
+                    const jitter = 0.8 + Math.sin(now * 0.02 + idx) * 0.3;
+                    f.scale.set(1, jitter, 1);
+                }
+            });
+
+            // Emergency Hazard Light Strobe Pulse
+            if (currentLighting === 'emergency' || isLeakSimulating) {
+                const strobe = (Math.sin(now * 0.015) + 1) / 2;
+                emergencyStrobeLight.intensity = strobe * 4.5;
+            } else {
+                emergencyStrobeLight.intensity = 0;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        // --- INTERACTIVE ACTIONS & SIMULATIONS ---
+        function trigger3DLeakSimulation() {
+            isLeakSimulating = !isLeakSimulating;
+            const btn = document.getElementById('btn3DLeak');
+            const btnText = document.getElementById('btn3DLeakText');
+            const valvePill = document.getElementById('hudValveStatusPill');
+            const valveText = document.getElementById('hudValveStatusText');
+            const ppmText = document.getElementById('hudGasPpm');
+            const flameText = document.getElementById('hudFlameStatus');
+
+            if (isLeakSimulating) {
+                btn.className = 'px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 border border-slate-700 transition';
+                btnText.innerText = 'Pulihkan / Matikan Kebocoran';
+
+                // Particle visibility
+                if (gasParticleMat) gasParticleMat.opacity = 0.75;
+
+                // Tabung 2 Halo LED turns Red
+                const pad2 = padsArray.find(p => p.id === 'T2');
+                if (pad2) pad2.halo.material.color.setHex(0xef4444);
+
+                // Solenoid valve turns off
+                if (solenoidValveMesh) {
+                    solenoidValveMesh.children[0].material.color.setHex(0xef4444);
+                }
+
+                // Update HUD
+                valvePill.className = 'glass-panel px-4 py-2 rounded-xl text-xs font-mono font-bold flex items-center gap-2 border-red-500/80 text-red-300 animate-pulse glow-red';
+                valveText.innerText = 'KATUP SOLENOID: SHUT OFF (BOCOR)';
+                ppmText.innerText = '850 ppm (BAHAYA!)';
+                ppmText.className = 'font-bold text-red-400 animate-pulse';
+                flameText.innerText = 'PADAM (GAS DIPUTUS)';
+                flameText.className = 'font-bold text-red-400';
+
+                // Sound & Emergency Lighting
+                startSiren();
+                setLightingMode('emergency');
+                flyToView('leak');
+            } else {
+                btn.className = 'px-4 py-2 rounded-xl bg-gradient-to-r from-red-600 to-red-700 hover:from-red-500 hover:to-red-600 text-white font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-red-900/40 transition';
+                btnText.innerText = 'Simulasikan Bocor Tabung 2';
+
+                if (gasParticleMat) gasParticleMat.opacity = 0;
+
+                const pad2 = padsArray.find(p => p.id === 'T2');
+                if (pad2) pad2.halo.material.color.setHex(0x10b981);
+
+                if (solenoidValveMesh) {
+                    solenoidValveMesh.children[0].material.color.setHex(0x10b981);
+                }
+
+                valvePill.className = 'glass-panel px-4 py-2 rounded-xl text-xs font-mono font-bold flex items-center gap-2 border-emerald-500/50 text-emerald-300';
+                valveText.innerText = 'KATUP SOLENOID: OPEN';
+                ppmText.innerText = '22 ppm';
+                ppmText.className = 'font-bold text-emerald-400';
+                flameText.innerText = 'MENYALA BIRU';
+                flameText.className = 'font-bold text-gas-cyan';
+
+                stopSiren();
+                setLightingMode('day');
+            }
+        }
+
+        function toggle3DExplodedView() {
+            is3DExploded = !is3DExploded;
+            const btn = document.getElementById('btn3DExploded');
+            const text = document.getElementById('btn3DExplodedText');
+
+            if (is3DExploded) {
+                btn.className = 'px-4 py-2 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg transition';
+                text.innerText = 'Tutup Struktur (Assemble)';
+                playChirp(800, 0.1);
+            } else {
+                btn.className = 'px-4 py-2 rounded-xl bg-gas-blue hover:bg-blue-600 text-white font-display font-bold text-xs uppercase tracking-wider flex items-center gap-2 shadow-lg shadow-gas-blue/20 transition';
+                text.innerText = 'Bongkar Struktur Pad (Exploded)';
+                playChirp(600, 0.1);
+            }
+        }
+
+        function flyToView(viewKey) {
+            const target = cameraPositions[viewKey];
+            if (!target) return;
+            targetCameraPos.copy(target.pos);
+            targetControlsTarget.copy(target.target);
+
+            // Update UI buttons
+            const btns = ['camBtnOverview', 'camBtnManifold', 'camBtnLeak', 'camBtnGateway', 'camBtnBurner'];
+            btns.forEach(bId => {
+                const b = document.getElementById(bId);
+                if (b) b.className = 'py-1.5 px-2.5 rounded-lg text-left font-semibold bg-gas-card text-slate-300 hover:text-white border border-gas-border flex items-center justify-between transition';
+            });
+            const activeMap = {
+                overview: 'camBtnOverview',
+                manifold: 'camBtnManifold',
+                leak: 'camBtnLeak',
+                gateway: 'camBtnGateway',
+                burner: 'camBtnBurner'
+            };
+            const activeBtn = document.getElementById(activeMap[viewKey]);
+            if (activeBtn) activeBtn.className = 'py-1.5 px-2.5 rounded-lg text-left font-semibold bg-gas-blue text-white border border-gas-blue flex items-center justify-between transition';
+            playChirp(920, 0.08);
+        }
+
+        function setLightingMode(mode) {
+            currentLighting = mode;
+            const bD = document.getElementById('lightDayBtn');
+            const bN = document.getElementById('lightNightBtn');
+            const bE = document.getElementById('lightEmerBtn');
+
+            bD.className = 'py-1 rounded bg-gas-card text-slate-400 text-center hover:text-white';
+            bN.className = 'py-1 rounded bg-gas-card text-slate-400 text-center hover:text-white';
+            bE.className = 'py-1 rounded bg-gas-card text-red-400 text-center hover:bg-red-950/40';
+
+            if (mode === 'day') {
+                bD.className = 'py-1 rounded bg-gas-blue text-white text-center font-bold';
+                ambientLight.color.setHex(0xffffff);
+                ambientLight.intensity = 0.85;
+                mainDirLight.intensity = 1.2;
+                scene.fog.color.setHex(0x060c16);
+            } else if (mode === 'night') {
+                bN.className = 'py-1 rounded bg-gas-blue text-white text-center font-bold';
+                ambientLight.color.setHex(0x1e3a5f);
+                ambientLight.intensity = 0.35;
+                mainDirLight.intensity = 0.5;
+                scene.fog.color.setHex(0x02050b);
+            } else {
+                bE.className = 'py-1 rounded bg-red-600 text-white text-center font-bold';
+                ambientLight.color.setHex(0x7f1d1d);
+                ambientLight.intensity = 0.5;
+                mainDirLight.intensity = 0.4;
+            }
+        }
+
+        function reset3DScene() {
+            if (isLeakSimulating) trigger3DLeakSimulation();
+            if (is3DExploded) toggle3DExplodedView();
+            setLightingMode('day');
+            flyToView('overview');
+        }
+
+        function onWindowResize() {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        }
+
+        window.addEventListener('DOMContentLoaded', init3D);
+    </script>
+</body>
+</html>
