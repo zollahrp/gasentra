@@ -338,11 +338,11 @@
 
         // Camera presets
         const cameraPositions = {
-            overview: { pos: new THREE.Vector3(0, 7, 14), target: new THREE.Vector3(0, 2, 0) },
-            manifold: { pos: new THREE.Vector3(0, 3.5, 6.5), target: new THREE.Vector3(0, 1.8, 0) },
-            leak: { pos: new THREE.Vector3(-1.4, 2.2, 4.0), target: new THREE.Vector3(-1.4, 1.4, 0) },
-            gateway: { pos: new THREE.Vector3(3.5, 4.2, 3.5), target: new THREE.Vector3(3.2, 3.8, -1.8) },
-            burner: { pos: new THREE.Vector3(-4.8, 3.0, 3.8), target: new THREE.Vector3(-5.5, 1.4, -0.2) }
+            overview: { pos: new THREE.Vector3(0.2, 5.0, 8.8), target: new THREE.Vector3(0.0, 1.4, -0.4) },
+            manifold: { pos: new THREE.Vector3(2.4, 2.8, 4.2), target: new THREE.Vector3(2.4, 1.3, -0.5) },
+            leak: { pos: new THREE.Vector3(1.6, 1.9, 2.6), target: new THREE.Vector3(1.6, 1.1, -0.5) },
+            gateway: { pos: new THREE.Vector3(3.1, 3.3, 1.6), target: new THREE.Vector3(3.1, 3.1, -1.9) },
+            burner: { pos: new THREE.Vector3(-3.2, 2.6, 3.0), target: new THREE.Vector3(-3.2, 1.3, -0.2) }
         };
 
         let targetCameraPos = cameraPositions.overview.pos.clone();
@@ -450,176 +450,353 @@
         function buildGasManifold() {
             const manifoldGroup = new THREE.Group();
 
-            // Main Horizontal Manifold Pipe (Yellow Industrial Gas Line)
-            const mainPipeGeo = new THREE.CylinderGeometry(0.08, 0.08, 9, 24);
+            // Main Horizontal Manifold Pipe (Heavy Yellow Gas Line above cylinders: x = 0.0 to 5.2)
+            const mainPipeGeo = new THREE.CylinderGeometry(0.05, 0.05, 5.6, 24);
             const mainPipeMat = new THREE.MeshStandardMaterial({
-                color: 0xfacc15, // Yellow gas pipe
-                metalness: 0.7,
-                roughness: 0.3
+                color: 0xfacc15,
+                metalness: 0.82,
+                roughness: 0.28
             });
             const mainPipe = new THREE.Mesh(mainPipeGeo, mainPipeMat);
             mainPipe.rotation.z = Math.PI / 2;
-            mainPipe.position.set(0, 2.2, -1.5);
+            mainPipe.position.set(2.6, 2.1, -1.6);
             mainPipe.castShadow = true;
             manifoldGroup.add(mainPipe);
 
-            // In-Line Automatic Red Solenoid Emergency Valve
-            const solGeo = new THREE.BoxGeometry(0.4, 0.5, 0.4);
-            const solMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.6, roughness: 0.2 });
-            solenoidValveMesh = new THREE.Mesh(solGeo, solMat);
-            solenoidValveMesh.position.set(0, 2.2, -1.5);
-            solenoidValveMesh.castShadow = true;
-            manifoldGroup.add(solenoidValveMesh);
+            // Wall Mounting Stanchion Brackets (2 heavy steel brackets on wall)
+            [0.6, 4.6].forEach(bx => {
+                const bGeo = new THREE.BoxGeometry(0.08, 0.35, 0.35);
+                const bMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9, roughness: 0.3 });
+                const bMesh = new THREE.Mesh(bGeo, bMat);
+                bMesh.position.set(bx, 2.1, -1.78);
+                manifoldGroup.add(bMesh);
+            });
 
-            // Solenoid Indicator LED (Green by default)
-            const solLedGeo = new THREE.SphereGeometry(0.06, 16, 16);
-            const solLedMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
-            const solLed = new THREE.Mesh(solLedGeo, solLedMat);
-            solLed.position.set(0, 2.45, -1.3);
-            solenoidValveMesh.add(solLed);
+            // Realistic Cast-Iron Solenoid Emergency Valve in-line (at x = 0.5)
+            const solAssembly = new THREE.Group();
+            solAssembly.position.set(0.5, 2.1, -1.6);
+            // Valve Body
+            const bodyMesh = new THREE.Mesh(
+                new THREE.BoxGeometry(0.24, 0.22, 0.24),
+                new THREE.MeshStandardMaterial({ color: 0x991b1b, metalness: 0.7, roughness: 0.3 })
+            );
+            solAssembly.add(bodyMesh);
+            // Solenoid Coil Housing (Top cylinder)
+            const coilMesh = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.09, 0.09, 0.22, 20),
+                new THREE.MeshStandardMaterial({ color: 0xdc2626, metalness: 0.5, roughness: 0.3 })
+            );
+            coilMesh.position.y = 0.18;
+            solAssembly.add(coilMesh);
+            // Manual Reset Lever (Yellow handle)
+            const mLever = new THREE.Mesh(
+                new THREE.BoxGeometry(0.02, 0.12, 0.03),
+                new THREE.MeshStandardMaterial({ color: 0xfacc15 })
+            );
+            mLever.position.set(0.12, 0.14, 0);
+            mLever.rotation.z = -Math.PI / 4;
+            solAssembly.add(mLever);
+            // Status LED
+            const solLed = new THREE.Mesh(
+                new THREE.SphereGeometry(0.035, 16, 16),
+                new THREE.MeshBasicMaterial({ color: 0x10b981 })
+            );
+            solLed.position.set(0, 0.28, 0.09);
+            solAssembly.add(solLed);
+            solenoidValveMesh = solAssembly;
+            manifoldGroup.add(solAssembly);
 
-            // Manifold Pressure Gauge (Analog dial)
-            const gaugeGeo = new THREE.CylinderGeometry(0.2, 0.2, 0.08, 24);
-            const gaugeMat = new THREE.MeshStandardMaterial({ color: 0xffffff });
-            const gauge = new THREE.Mesh(gaugeGeo, gaugeMat);
-            gauge.rotation.x = Math.PI / 2;
-            gauge.position.set(1.5, 2.6, -1.45);
-            manifoldGroup.add(gauge);
+            // Analog Dial Pressure Gauge
+            const pGauge = new THREE.Mesh(
+                new THREE.CylinderGeometry(0.12, 0.12, 0.05, 24),
+                new THREE.MeshStandardMaterial({ color: 0xffffff, roughness: 0.3 })
+            );
+            pGauge.rotation.x = Math.PI / 2;
+            pGauge.position.set(4.8, 2.38, -1.55);
+            manifoldGroup.add(pGauge);
 
-            // 4 Gas Down-Pipes with Brass Ball Valves connecting to hoses
-            const xPositions = [-3.0, -1.2, 0.8, 2.8];
-            xPositions.forEach((xPos, idx) => {
-                // Vertical dropper pipe
-                const dropGeo = new THREE.CylinderGeometry(0.04, 0.04, 0.6, 16);
-                const dropMat = new THREE.MeshStandardMaterial({ color: 0xfacc15 });
-                const drop = new THREE.Mesh(dropGeo, dropMat);
-                drop.position.set(xPos, 1.9, -1.5);
-                manifoldGroup.add(drop);
+            // 4 Gas Droppers with Brass Isolation Ball Valves connecting to hoses
+            const xPositions = [0.4, 1.8, 3.2, 4.6];
+            xPositions.forEach((xPos) => {
+                // Brass Isolation Ball Valve
+                const bValve = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.08, 0.12, 0.08),
+                    new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.2 })
+                );
+                bValve.position.set(xPos, 1.95, -1.6);
+                manifoldGroup.add(bValve);
 
-                // Brass Isolation Valve
-                const brassGeo = new THREE.BoxGeometry(0.12, 0.12, 0.12);
-                const brassMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9, roughness: 0.2 });
-                const brass = new THREE.Mesh(brassGeo, brassMat);
-                brass.position.set(xPos, 1.6, -1.5);
-                manifoldGroup.add(brass);
+                // Quarter-turn Yellow Valve Handle
+                const vLever = new THREE.Mesh(
+                    new THREE.BoxGeometry(0.015, 0.08, 0.02),
+                    new THREE.MeshStandardMaterial({ color: 0xfacc15 })
+                );
+                vLever.position.set(xPos + 0.045, 1.98, -1.6);
+                vLever.rotation.z = -Math.PI / 3;
+                manifoldGroup.add(vLever);
 
-                // Flexible Stainless Steel Braided Hose dropping to cylinder
-                const curve = new THREE.CatmullRomCurve3([
-                    new THREE.Vector3(xPos, 1.55, -1.5),
-                    new THREE.Vector3(xPos, 1.2, -1.1),
-                    new THREE.Vector3(xPos, 1.1, -0.4)
+                // Flexible Stainless Steel Braided Gas Hose (Slack loop curve from valve to cylinder regulator)
+                const hoseCurve = new THREE.CatmullRomCurve3([
+                    new THREE.Vector3(xPos, 1.9, -1.6),
+                    new THREE.Vector3(xPos, 1.6, -1.35),
+                    new THREE.Vector3(xPos, 1.35, -0.9),
+                    new THREE.Vector3(xPos, 1.25, -0.55) // Connects to cylinder regulator
                 ]);
-                const hoseGeo = new THREE.TubeGeometry(curve, 20, 0.03, 8, false);
-                const hoseMat = new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.8, roughness: 0.3 });
-                const hose = new THREE.Mesh(hoseGeo, hoseMat);
+                const hose = new THREE.Mesh(
+                    new THREE.TubeGeometry(hoseCurve, 24, 0.024, 10, false),
+                    new THREE.MeshStandardMaterial({ color: 0x94a3b8, metalness: 0.85, roughness: 0.28 })
+                );
                 manifoldGroup.add(hose);
             });
+
+            // Gas Supply Pipe running leftwards from Solenoid Valve towards the Stove
+            const toStoveCurve = new THREE.CatmullRomCurve3([
+                new THREE.Vector3(0.4, 2.1, -1.6),
+                new THREE.Vector3(-1.8, 2.1, -1.6),
+                new THREE.Vector3(-1.8, 1.2, -1.4),
+                new THREE.Vector3(-1.9, 1.0, -0.6) // Links to rear of stove
+            ]);
+            const toStovePipe = new THREE.Mesh(
+                new THREE.TubeGeometry(toStoveCurve, 24, 0.038, 12, false),
+                new THREE.MeshStandardMaterial({ color: 0xfacc15, metalness: 0.8, roughness: 0.3 })
+            );
+            manifoldGroup.add(toStovePipe);
 
             scene.add(manifoldGroup);
         }
 
-        // --- 3. LPG CYLINDERS & GASENTRA SMART BASE PADS ---
         function buildCylindersAndPads() {
+            // Clean arrays
+            padsArray = [];
+            cylindersArray = [];
+
             const configs = [
-                { id: 'T1', x: -3.0, z: -0.4, type: '12kg', color: 0xdb2777, name: 'Tabung 1' },
-                { id: 'T2', x: -1.2, z: -0.4, type: '12kg', color: 0xdb2777, name: 'Tabung 2 (Leak Target)' },
-                { id: 'T3', x: 0.8, z: -0.4, type: '12kg', color: 0xdb2777, name: 'Tabung 3 (New)' },
-                { id: 'T4', x: 2.8, z: -0.4, type: '50kg', color: 0x2563eb, name: 'Tabung 4 (Industrial)' }
+                { id: 'T1', x: 0.4, z: -0.55, type: '12kg', color: 0xbe185d, name: 'Tabung 1' },
+                { id: 'T2', x: 1.8, z: -0.55, type: '12kg', color: 0xbe185d, name: 'Tabung 2 (Leak Target)' },
+                { id: 'T3', x: 3.2, z: -0.55, type: '12kg', color: 0xbe185d, name: 'Tabung 3 (New)' },
+                { id: 'T4', x: 4.6, z: -0.55, type: '50kg', color: 0x1d4ed8, name: 'Tabung 4 (Industrial)' }
             ];
 
+            // Shared realistic materials for cylinders
+            const brassValveMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.92, roughness: 0.2 });
+            const redSealMat = new THREE.MeshStandardMaterial({ color: 0xdc2626, roughness: 0.4 });
+            const regulatorMat = new THREE.MeshStandardMaterial({ color: 0x1e293b, metalness: 0.6, roughness: 0.4 });
+            const seamMat = new THREE.MeshStandardMaterial({ color: 0x831843, roughness: 0.6 });
+
             configs.forEach((cfg) => {
-                // A. BUILD GASENTRA SMART BASE PAD UNDERNEATH
+                const is50 = cfg.type === '50kg';
+                const cylRadius = is50 ? 0.48 : 0.40;
+                const bodyHeight = is50 ? 1.60 : 0.72;
+                const cylColor = cfg.color;
+
+                const cylPaintMat = new THREE.MeshStandardMaterial({
+                    color: cylColor,
+                    roughness: 0.52,
+                    metalness: 0.22
+                });
+
+                // =========================================================
+                // A. GASENTRA SMART BASE PAD (UNDERNEATH SCALE & SENSOR)
+                // =========================================================
                 const padGroup = new THREE.Group();
                 padGroup.position.set(cfg.x, 0, cfg.z);
 
-                // Pad Base Chassis (Dark Cast Aluminum)
-                const baseGeo = new THREE.CylinderGeometry(1.05, 1.1, 0.12, 32);
-                const baseMat = new THREE.MeshStandardMaterial({ color: 0x141f2e, metalness: 0.8, roughness: 0.3 });
-                const base = new THREE.Mesh(baseGeo, baseMat);
-                base.position.y = 0.06;
-                base.receiveShadow = true;
-                padGroup.add(base);
+                // Heavy-Duty Cast Aluminum Scale Platter Base
+                const padBaseGeo = new THREE.CylinderGeometry(cylRadius * 1.3, cylRadius * 1.35, 0.08, 36);
+                const padBaseMat = new THREE.MeshStandardMaterial({ color: 0x0f172a, metalness: 0.85, roughness: 0.25 });
+                const padBase = new THREE.Mesh(padBaseGeo, padBaseMat);
+                padBase.position.y = 0.04;
+                padBase.receiveShadow = true;
+                padGroup.add(padBase);
 
-                // Internal Load Cell Blocks (visible on exploded)
+                // Internal 4x Load Cell Blocks (visible on exploded view)
                 const cellsGroup = new THREE.Group();
                 for (let i = 0; i < 4; i++) {
                     const angle = (i * Math.PI) / 2 + Math.PI / 4;
-                    const cGeo = new THREE.BoxGeometry(0.18, 0.08, 0.28);
+                    const cGeo = new THREE.BoxGeometry(0.12, 0.05, 0.20);
                     const cMat = new THREE.MeshStandardMaterial({ color: 0x10b981, metalness: 0.9 });
                     const cell = new THREE.Mesh(cGeo, cMat);
-                    cell.position.set(Math.cos(angle) * 0.7, 0.1, Math.sin(angle) * 0.7);
+                    cell.position.set(Math.cos(angle) * (cylRadius * 0.9), 0.08, Math.sin(angle) * (cylRadius * 0.9));
                     cellsGroup.add(cell);
                 }
                 padGroup.add(cellsGroup);
 
-                // 360° Circular Halo LED Ring
-                const haloGeo = new THREE.TorusGeometry(1.04, 0.035, 12, 36);
+                // Circular 360 Halo LED Status Ring
+                const haloGeo = new THREE.TorusGeometry(cylRadius * 1.28, 0.025, 12, 36);
                 const haloMat = new THREE.MeshBasicMaterial({ color: 0x10b981 });
                 const haloRing = new THREE.Mesh(haloGeo, haloMat);
                 haloRing.rotation.x = Math.PI / 2;
-                haloRing.position.y = 0.12;
+                haloRing.position.y = 0.085;
                 padGroup.add(haloRing);
 
-                // Top Stainless Steel Platter
-                const platterGeo = new THREE.CylinderGeometry(1.0, 1.0, 0.06, 32);
-                const platterMat = new THREE.MeshStandardMaterial({ color: 0x475569, metalness: 0.9, roughness: 0.2 });
+                // Top Scale Platter with Non-Slip Recessed Bed
+                const platterGeo = new THREE.CylinderGeometry(cylRadius * 1.22, cylRadius * 1.22, 0.04, 36);
+                const platterMat = new THREE.MeshStandardMaterial({ color: 0x334155, metalness: 0.9, roughness: 0.2 });
                 const platter = new THREE.Mesh(platterGeo, platterMat);
-                platter.position.y = 0.16;
+                platter.position.y = 0.11;
                 platter.castShadow = true;
                 padGroup.add(platter);
+
+                // Non-slip rubber ring groove
+                const rubberRing = new THREE.Mesh(
+                    new THREE.TorusGeometry(cylRadius * 0.88, 0.02, 8, 32),
+                    new THREE.MeshStandardMaterial({ color: 0x020617, roughness: 0.9 })
+                );
+                rubberRing.rotation.x = Math.PI / 2;
+                rubberRing.position.y = 0.13;
+                padGroup.add(rubberRing);
 
                 scene.add(padGroup);
                 padsArray.push({ id: cfg.id, group: padGroup, platter: platter, halo: haloRing, cells: cellsGroup });
 
-                // B. BUILD 3D CYLINDER
+                // =========================================================
+                // B. AUTHENTIC INDONESIAN LPG CYLINDER (PERTAMINA BRIGHT GAS)
+                // =========================================================
                 const cylGroup = new THREE.Group();
-                cylGroup.position.set(cfg.x, 0.19, cfg.z);
+                cylGroup.position.set(cfg.x, 0.13, cfg.z);
 
-                const is50 = cfg.type === '50kg';
-                const radius = is50 ? 0.9 : 0.72;
-                const height = is50 ? 2.6 : 1.35;
+                // 1. Bottom Steel Foot Ring (Ring Kaki Bawah Tabung)
+                const footRingH = is50 ? 0.18 : 0.12;
+                const footRing = new THREE.Mesh(
+                    new THREE.CylinderGeometry(cylRadius * 0.88, cylRadius * 0.88, footRingH, 32, 1, true),
+                    cylPaintMat
+                );
+                footRing.position.y = footRingH / 2;
+                cylGroup.add(footRing);
 
-                // Cylinder Body
-                const bodyGeo = new THREE.CylinderGeometry(radius, radius, height, 32);
-                const bodyMat = new THREE.MeshStandardMaterial({
-                    color: cfg.color,
-                    metalness: 0.4,
-                    roughness: 0.4
+                // Rolled foot ring bottom rim
+                const footRim = new THREE.Mesh(
+                    new THREE.TorusGeometry(cylRadius * 0.88, 0.012, 8, 32),
+                    cylPaintMat
+                );
+                footRim.rotation.x = Math.PI / 2;
+                footRim.position.y = 0.01;
+                cylGroup.add(footRim);
+
+                // 2. Bottom Convex Dish
+                const bDishGeo = new THREE.SphereGeometry(cylRadius, 32, 12, 0, Math.PI * 2, Math.PI / 2, Math.PI / 2);
+                const bDish = new THREE.Mesh(bDishGeo, cylPaintMat);
+                bDish.position.y = footRingH + 0.02;
+                bDish.rotation.x = Math.PI;
+                cylGroup.add(bDish);
+
+                // 3. Main Cylindrical Welded Steel Body
+                const bodyMesh = new THREE.Mesh(
+                    new THREE.CylinderGeometry(cylRadius, cylRadius, bodyHeight, 32),
+                    cylPaintMat
+                );
+                bodyMesh.position.y = footRingH + (bodyHeight / 2) + 0.02;
+                bodyMesh.castShadow = true;
+                bodyMesh.receiveShadow = true;
+                cylGroup.add(bodyMesh);
+
+                // Center Welded Seam Ring (Lis Las Tengah Khas Tabung Gas)
+                const seam1 = new THREE.Mesh(
+                    new THREE.TorusGeometry(cylRadius * 1.008, 0.014, 10, 36),
+                    seamMat
+                );
+                seam1.rotation.x = Math.PI / 2;
+                seam1.position.y = footRingH + (bodyHeight / 2) + 0.02;
+                cylGroup.add(seam1);
+
+                // 4. Front Decal Silkscreen Badge (Logo & Tulisan Pertamina / Bright Gas)
+                const decalGeo = new THREE.CylinderGeometry(cylRadius * 1.012, cylRadius * 1.012, 0.28, 16, 1, true, -Math.PI * 0.28, Math.PI * 0.56);
+                const decalMat = new THREE.MeshBasicMaterial({ color: 0xffffff, side: THREE.DoubleSide });
+                const decal = new THREE.Mesh(decalGeo, decalMat);
+                decal.position.y = footRingH + (bodyHeight * 0.65);
+                cylGroup.add(decal);
+
+                // Red/Cyan Logo Star inside Decal
+                const logoEmblem = new THREE.Mesh(
+                    new THREE.CircleGeometry(0.08, 16),
+                    new THREE.MeshBasicMaterial({ color: is50 ? 0x1d4ed8 : 0xbe185d, side: THREE.DoubleSide })
+                );
+                logoEmblem.position.set(0, footRingH + (bodyHeight * 0.65), cylRadius * 1.018);
+                cylGroup.add(logoEmblem);
+
+                // 5. Upper Rounded Shoulder Dome
+                const shoulderH = cylRadius * 0.6;
+                const shoulderGeo = new THREE.SphereGeometry(cylRadius, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2.8);
+                const shoulder = new THREE.Mesh(shoulderGeo, cylPaintMat);
+                shoulder.position.y = footRingH + bodyHeight + 0.02;
+                cylGroup.add(shoulder);
+
+                // 6. Top Protective Valve Crown & Handle Shroud (Mahkota Pelindung Katup & Pegangan Tangan)
+                const crownRadius = cylRadius * 0.65;
+                const crownHeight = is50 ? 0.35 : 0.26;
+                const crownBaseY = footRingH + bodyHeight + shoulderH - 0.06;
+
+                // Two curved protective steel shield plates (front & back), leaving oval hand holes on sides!
+                const frontShieldGeo = new THREE.CylinderGeometry(crownRadius, crownRadius * 1.05, crownHeight, 16, 1, true, -Math.PI * 0.35, Math.PI * 0.7);
+                const frontShield = new THREE.Mesh(frontShieldGeo, cylPaintMat);
+                frontShield.position.y = crownBaseY + (crownHeight / 2);
+                cylGroup.add(frontShield);
+
+                const backShieldGeo = new THREE.CylinderGeometry(crownRadius, crownRadius * 1.05, crownHeight, 16, 1, true, Math.PI * 0.65, Math.PI * 0.7);
+                const backShield = new THREE.Mesh(backShieldGeo, cylPaintMat);
+                backShield.position.y = crownBaseY + (crownHeight / 2);
+                cylGroup.add(backShield);
+
+                // Rolled steel top lip rim (Bibir Pelindung Pegangan Tangan yang Tebal)
+                const crownLip = new THREE.Mesh(
+                    new THREE.TorusGeometry(crownRadius, 0.018, 12, 32),
+                    cylPaintMat
+                );
+                crownLip.rotation.x = Math.PI / 2;
+                crownLip.position.y = crownBaseY + crownHeight;
+                cylGroup.add(crownLip);
+
+                // Two rounded oval hand grip bars (Grip tangan koki)
+                [-crownRadius, crownRadius].forEach(gx => {
+                    const gBar = new THREE.Mesh(
+                        new THREE.CylinderGeometry(0.016, 0.016, 0.12, 12),
+                        cylPaintMat
+                    );
+                    gBar.position.set(gx, crownBaseY + crownHeight * 0.65, 0);
+                    cylGroup.add(gBar);
                 });
-                const body = new THREE.Mesh(bodyGeo, bodyMat);
-                body.position.y = height / 2;
-                body.castShadow = true;
-                cylGroup.add(body);
 
-                // Top Rounded Dome
-                const domeGeo = new THREE.SphereGeometry(radius, 32, 16, 0, Math.PI * 2, 0, Math.PI / 2);
-                const dome = new THREE.Mesh(domeGeo, bodyMat);
-                dome.position.y = height;
-                cylGroup.add(dome);
+                // 7. Brass Valve Spindle inside Crown (Katup Kuningan Asli)
+                const valveMesh = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.04, 0.04, 0.18, 16),
+                    brassValveMat
+                );
+                valveMesh.position.y = crownBaseY + 0.08;
+                cylGroup.add(valveMesh);
 
-                // Protective Collar Ring
-                const collarGeo = new THREE.CylinderGeometry(radius * 0.7, radius * 0.7, 0.28, 24, 1, true);
-                const collarMat = new THREE.MeshStandardMaterial({ color: cfg.color, side: THREE.DoubleSide });
-                const collar = new THREE.Mesh(collarGeo, collarMat);
-                collar.position.y = height + 0.25;
-                cylGroup.add(collar);
+                // Red Plastic Security Seal Ring (Segel Plastik Merah Pertamina)
+                const redSeal = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.048, 0.048, 0.05, 16),
+                    redSealMat
+                );
+                redSeal.position.y = crownBaseY + 0.16;
+                cylGroup.add(redSeal);
 
-                // Brass Valve on Top
-                const valveGeo = new THREE.CylinderGeometry(0.08, 0.08, 0.2, 16);
-                const valveMat = new THREE.MeshStandardMaterial({ color: 0xd97706, metalness: 0.9 });
-                const valve = new THREE.Mesh(valveGeo, valveMat);
-                valve.position.y = height + 0.15;
-                cylGroup.add(valve);
+                // High-Pressure Gas Pressure Regulator clamped on top
+                const regBody = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.07, 0.07, 0.06, 20),
+                    regulatorMat
+                );
+                regBody.position.y = crownBaseY + 0.22;
+                cylGroup.add(regBody);
+
+                // Brass locking knob on regulator
+                const regKnob = new THREE.Mesh(
+                    new THREE.CylinderGeometry(0.025, 0.025, 0.04, 16),
+                    brassValveMat
+                );
+                regKnob.position.set(0.06, crownBaseY + 0.22, 0);
+                regKnob.rotation.z = Math.PI / 2;
+                cylGroup.add(regKnob);
 
                 scene.add(cylGroup);
-                cylindersArray.push({ id: cfg.id, group: cylGroup, baseHeight: 0.19 });
+                cylindersArray.push({ id: cfg.id, group: cylGroup, baseHeight: 0.13 });
             });
         }
 
-        // --- 4. WALL-MOUNTED CENTRAL INDUSTRIAL GATEWAY ---
         function buildWallGateway() {
             gatewayMeshGroup = new THREE.Group();
-            gatewayMeshGroup.position.set(4.2, 3.8, -1.9);
+            gatewayMeshGroup.position.set(3.2, 3.2, -1.95);
 
             // Gateway Enclosure
             const boxGeo = new THREE.BoxGeometry(1.4, 1.0, 0.25);
@@ -669,7 +846,7 @@
                 // --- 5. HIGH-FIDELITY COMMERCIAL GAS STOVE RANGE (KOMPOR KWALI RANGE RESTORAN) ---
         function buildWokCookingStation() {
             const cooktopGroup = new THREE.Group();
-            cooktopGroup.position.set(-5.5, 0, -0.2);
+            cooktopGroup.position.set(-3.2, 0, -0.2);
 
             // High-Quality Materials
             const stainlessMat = new THREE.MeshStandardMaterial({
@@ -1064,9 +1241,9 @@
             gasParticlePositions = new Float32Array(particleCount * 3);
 
             for (let i = 0; i < particleCount; i++) {
-                gasParticlePositions[i * 3] = -1.2 + (Math.random() - 0.5) * 0.4;
-                gasParticlePositions[i * 3 + 1] = 1.35 + Math.random() * 0.5;
-                gasParticlePositions[i * 3 + 2] = -0.4 + (Math.random() - 0.5) * 0.4;
+                gasParticlePositions[i * 3] = 1.8 + (Math.random() - 0.5) * 0.3;
+                gasParticlePositions[i * 3 + 1] = 1.25 + Math.random() * 0.4;
+                gasParticlePositions[i * 3 + 2] = -0.55 + (Math.random() - 0.5) * 0.3;
             }
 
             gasParticleGeo.setAttribute('position', new THREE.BufferAttribute(gasParticlePositions, 3));
@@ -1125,9 +1302,9 @@
 
                     // Reset particle when it reaches floor
                     if (pos[i * 3 + 1] < 0.1) {
-                        pos[i * 3] = -1.2 + (Math.random() - 0.5) * 0.2;
-                        pos[i * 3 + 1] = 1.35;
-                        pos[i * 3 + 2] = -0.4 + (Math.random() - 0.5) * 0.2;
+                        pos[i * 3] = 1.8 + (Math.random() - 0.5) * 0.2;
+                        pos[i * 3 + 1] = 1.25;
+                        pos[i * 3 + 2] = -0.55 + (Math.random() - 0.5) * 0.2;
                     }
                 }
                 gasParticleGeo.attributes.position.needsUpdate = true;
